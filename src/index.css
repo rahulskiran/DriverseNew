@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+    --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    --animate-slide-down: slideDown 0.3s ease-out forwards;
+    --animate-fade-in-up: fadeInUp 0.8s ease-out forwards;
+    --animate-slow-zoom: slowZoom 20s linear infinite alternate;
+    --animate-blob: blob 7s infinite;
+    --animate-float: float 10s ease-in-out infinite;
+}
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slowZoom {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.1;
+    }
+
+    50% {
+        transform: translateY(-100px) rotate(180deg);
+        opacity: 0.3;
+    }
+}
+
+/* Animation delay utilities */
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+/* Scroll-triggered Fade-In Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Sections start hidden */
+section[data-animate] {
+    opacity: 0;
+}
+
+/* Visible class triggers animation */
+section[data-animate].visible {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Layout Stability Improvements */
+img {
+    /* Prevent layout shifts from images */
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Prevent cumulative layout shift */
+section {
+    contain: layout style;
+}
+
+/* Smooth transitions without layout shifts */
+* {
+    /* Hardware acceleration for smoother animations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent flickering on hover transitions */
+.transition-all,
+.transition-colors,
+.transition-transform {
+    will-change: auto;
+}
