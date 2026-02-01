@@ -1,0 +1,165 @@
+import React from 'react';
+import { Menu, MoveRight, Truck } from 'lucide-react';
+import Button from './Button';
+
+const Hero = () => {
+    const navLinks = [
+        { name: "Our Foundation", href: "#foundation" },
+        { name: "Programs", href: "#programs" },
+        { name: "Testimonials", href: "#testimonials" },
+        { name: "FAQ", href: "#faq" }
+    ];
+
+    const handleNavClick = (e, href) => {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+            const offsetTop = target.offsetTop - 100; // Account for fixed header
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    return (
+        <div className="font-inter text-white bg-[#020617]">
+            {/* Navigation Header */}
+            <header className="fixed top-0 left-0 w-full z-50 p-4 md:p-8 flex justify-center">
+                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2 md:px-8 md:py-2.5 flex items-center justify-between shadow-2xl">
+                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer group/logo">
+                        <div className="p-2 bg-[#0071e3] rounded-xl shadow-lg shadow-blue-500/20">
+                            <Truck className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                        </div>
+                        <span className="text-xl md:text-2xl font-semibold tracking-tight">Driverse</span>
+                    </a>
+
+                    <div className="hidden lg:flex items-center gap-10">
+                        {navLinks.map((link) => (
+                            <a
+                                key={link.name}
+                                href={link.href}
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className="text-[11px] nav-text uppercase text-slate-300 hover:text-white transition-all duration-300 relative group/link"
+                            >
+                                {link.name}
+                                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-white rounded-full transition-all duration-300 group-hover/link:w-4" />
+                            </a>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            className="hidden sm:flex whitespace-nowrap px-6 border-none font-medium"
+                            onClick={() => {
+                                const donateSection = document.querySelector('#donate');
+                                if (donateSection) {
+                                    const offsetTop = donateSection.offsetTop - 100;
+                                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                                }
+                            }}
+                        >
+                            Donate Now
+                        </Button>
+                        <button className="lg:hidden p-2.5 hover:bg-white/10 transition-colors">
+                            <Menu className="h-5 w-5 text-white" />
+                        </button>
+                    </div>
+                </nav>
+            </header>
+
+
+            {/* Hero Section Wrapper - Bottom-aligned on mobile, vertically centered on desktop */}
+            <section className="relative min-h-screen w-full overflow-hidden flex flex-col justify-end lg:justify-center">
+                {/* Background Layer - Scoped specifically to this section */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    {/* Desktop Image */}
+                    <div
+                        className="hidden md:block absolute inset-0 w-full h-full bg-cover bg-center"
+                        style={{ backgroundImage: 'url("/images/16-9.webp")' }}
+                    />
+                    {/* Mobile Image */}
+                    <div
+                        className="block md:hidden absolute inset-0 w-full h-full bg-cover bg-center"
+                        style={{ backgroundImage: 'url("/images/Driverse Hero Mobile_1.webp")' }}
+                    />
+
+                    {/* ========== MOBILE OVERLAY ========== */}
+                    <div className="block md:hidden absolute inset-0 bg-black/10" />
+
+                    {/* ========== DESKTOP OVERLAY ========== */}
+                    <div className="hidden md:block absolute inset-0 bg-black/30" />
+
+                    {/* ========== MOBILE VIGNETTE ========== */}
+                    <div
+                        className="block md:hidden absolute inset-0 pointer-events-none"
+                        style={{
+                            background: 'radial-gradient(circle, transparent 0%, rgba(0,0,0,0.5) 100%)'
+                        }}
+                    />
+
+                    {/* ========== DESKTOP VIGNETTE ========== */}
+                    <div
+                        className="hidden md:block absolute inset-0 pointer-events-none"
+                        style={{
+                            background: 'radial-gradient(circle, transparent 20%, rgba(0,0,0,0.7) 100%)'
+                        }}
+                    />
+                </div>
+
+                {/* Hero Content Area - Bottom-aligned on mobile, left-center on desktop */}
+                <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pt-32 pb-16 md:px-12 lg:px-24 flex flex-col lg:items-start lg:text-left">
+                    <div className="mb-6 lg:mb-8 text-left w-full opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                        <p className="text-blue-500 font-black text-sm md:text-sm uppercase tracking-[0.05em] drop-shadow-[0_0_12px_rgba(59,158,255,0.8)]">
+                            Supporting Drivers, Every Mile
+                        </p>
+                    </div>
+
+                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                        Driving Change<br />
+                        for the Heroes.
+                    </h1>
+
+                    <p className="text-white/60 text-base md:text-base lg:text-lg mb-12 leading-relaxed max-w-2xl lg:max-w-xl body-light text-left opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                        We are dedicated to the health, safety, and well-being of truck drivers.
+                        Providing the essential resources needed to keep our global supply chain moving forward.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:max-w-md lg:max-w-4xl opacity-0 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                        <Button
+                            variant="primary"
+                            className="lg:w-fit lg:h-14 lg:text-base"
+                            onClick={() => {
+                                const donateSection = document.querySelector('#donate');
+                                if (donateSection) {
+                                    const offsetTop = donateSection.offsetTop - 100;
+                                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                                }
+                            }}
+                        >
+                            Make a Donation
+                            <MoveRight className="h-5 w-5 transition-transform duration-500 group-hover:translate-x-2" />
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            className="lg:w-fit lg:h-14 lg:text-base"
+                            onClick={() => {
+                                const programsSection = document.querySelector('#programs');
+                                if (programsSection) {
+                                    const offsetTop = programsSection.offsetTop - 100;
+                                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                                }
+                            }}
+                        >
+                            Our Programs
+                        </Button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+};
+
+export default Hero;
