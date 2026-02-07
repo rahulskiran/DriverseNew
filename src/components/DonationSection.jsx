@@ -57,7 +57,7 @@ const DonationSection = () => {
 
             <div className="relative z-10 max-w-2xl w-full px-6">
                 {/* Unified Donation Block */}
-                <div className="bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl shadow-blue-900/10 border border-slate-100/50 opacity-0 animate-fadeInUp transition-all duration-500 hover:shadow-blue-900/15" style={{ animationDelay: '0.2s' }}>
+                <div className="bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl shadow-blue-900/10 border border-slate-100/50 reveal transition-all duration-500 hover:shadow-blue-900/15 delay-200">
 
                     {/* Header Inside Card */}
                     <div className="flex flex-col items-center text-center mb-6 md:mb-8">

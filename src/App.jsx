@@ -12,45 +12,45 @@ function App() {
     // Intersection Observer for scroll-triggered animations
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
+      rootMargin: '0px 0px -50px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+          entry.target.classList.add('active');
         }
       });
     }, observerOptions);
 
-    // Observe all sections with data-animate attribute
-    const sections = document.querySelectorAll('[data-animate]');
-    sections.forEach(section => observer.observe(section));
+    // Observe all elements with .reveal class
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach(el => observer.observe(el));
 
     // Smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
 
     return () => {
-      sections.forEach(section => observer.unobserve(section));
+      elements.forEach(el => observer.unobserve(el));
     };
   }, []);
 
   return (
     <main className="bg-[#020617] overflow-x-hidden">
       <Hero />
-      <div id="foundation" data-animate>
+      <div id="foundation">
         <FoundationSection />
       </div>
-      <div id="programs" data-animate>
+      <div id="programs">
         <PillarsOfSupport />
       </div>
-      <div id="testimonials" data-animate>
+      <div id="testimonials">
         <Testimonials />
       </div>
-      <div id="faq" data-animate>
+      <div id="faq">
         <FAQ />
       </div>
-      <div id="donate" data-animate>
+      <div id="donate">
         <DonationSection />
       </div>
       <Footer />

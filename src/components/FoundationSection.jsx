@@ -99,19 +99,19 @@ const FoundationSection = () => {
                     <div className="space-y-10 md:space-y-12">
                         <div className="space-y-6 md:space-y-8">
                             {/* Mission Identifier */}
-                            <div className="flex items-center gap-3 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                            <div className="flex items-center gap-3 reveal delay-100">
                                 <div className="w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)] animate-pulse" />
                                 <span className="text-blue-600 font-bold tracking-[0.25em] uppercase text-[10px] md:text-xs">
                                     Our Mission
                                 </span>
                             </div>
 
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl heading-display text-slate-900 opacity-0 animate-fadeInUp leading-[1.1]" style={{ animationDelay: '0.2s' }}>
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl heading-display text-slate-900 reveal delay-200 leading-[1.1]">
                                 Bridging the Gap<br />
                                 Between <span className="text-blue-600">the Road<br className="md:hidden" /> and Life.</span>
                             </h2>
 
-                            <div className="space-y-5 md:space-y-6 text-slate-600 text-base md:text-lg leading-relaxed max-w-xl body-light opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                            <div className="space-y-5 md:space-y-6 text-slate-600 text-base md:text-lg leading-relaxed max-w-xl body-light reveal delay-300">
                                 <p className="text-slate-700">
                                     The road can be demanding and lonely. The Driverse Foundation bridges the gap between the pressures of logistics and the human needs of drivers.
                                 </p>
@@ -122,7 +122,7 @@ const FoundationSection = () => {
                         </div>
 
                         {/* Feature Boxes */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 reveal delay-400">
                             <div className="group flex items-start gap-4 p-5 md:p-6 border border-slate-200/40 rounded-[1.75rem] bg-gradient-to-br from-white to-slate-50/30 backdrop-blur-sm hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-500">
                                 <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-11 h-11 md:w-12 md:h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 group-hover:shadow-blue-500/40 transition-all duration-500 flex-shrink-0">
                                     <Globe className="w-5 h-5 md:w-6 md:h-6" />
@@ -145,7 +145,7 @@ const FoundationSection = () => {
                     </div>
 
                     {/* Right Stats Grid Column */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 reveal delay-500">
                         {stats.map((stat, index) => (
                             <div
                                 key={index}

@@ -150,12 +150,23 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <p className="text-slate-500 text-xs font-medium">
-                        © 2026 Driverse Foundation. All rights reserved.
-                    </p>
+                <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-6">
+                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                        <p className="text-slate-500 text-xs font-medium">
+                            © 2026 Driverse Foundation. All rights reserved.
+                        </p>
+                        <span className="hidden md:block text-slate-700">|</span>
+                        <a
+                            href="https://www.texnoid.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-slate-900/50 md:bg-transparent px-4 py-2 md:p-0 rounded-full md:rounded-none border border-slate-800 md:border-none text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors flex items-center gap-1.5"
+                        >
+                            Built by <span className="text-slate-400 font-bold hover:text-blue-500 transition-colors">Texnoid Solution LLP</span>
+                        </a>
+                    </div>
 
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-6 md:gap-8">
                         {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((link) => (
                             <a key={link} href="#" className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors">
                                 {link}

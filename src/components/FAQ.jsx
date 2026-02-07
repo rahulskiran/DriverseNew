@@ -4,8 +4,8 @@ import { HelpCircle, Plus, Minus, ArrowRight } from 'lucide-react';
 const FAQItem = ({ question, answer, isOpen, onClick, delay }) => {
     return (
         <div
-            className={`group mb-3 opacity-0 animate-fadeInUp`}
-            style={{ animationDelay: `${delay}s` }}
+            className={`group mb-3 reveal`}
+            style={{ transitionDelay: `${delay}s` }}
         >
             <button
                 onClick={onClick}
@@ -77,7 +77,7 @@ const FAQ = () => {
 
                     {/* Left Column: Header Content */}
                     <div className="sticky top-12">
-                        <div className="flex items-center gap-3 mb-6 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                        <div className="flex items-center gap-3 mb-6 reveal delay-100">
                             <div className="w-10 h-10 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 shadow-lg shadow-blue-500/10">
                                 <HelpCircle size={22} />
                             </div>
@@ -86,15 +86,15 @@ const FAQ = () => {
                             </span>
                         </div>
 
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-white mb-4 md:mb-6 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-white mb-4 md:mb-6 reveal delay-200">
                             Common <br /> <span className="text-blue-500">Questions.</span>
                         </h2>
 
-                        <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6 md:mb-8 max-w-md body-light opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                        <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6 md:mb-8 max-w-md body-light reveal delay-300">
                             We know you don't have time to waste. Here are quick answers to the most common questions about our programs and assistance.
                         </p>
 
-                        <button className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-3 group opacity-0 animate-fadeInUp shadow-xl shadow-black/20" style={{ animationDelay: '0.4s' }}>
+                        <button className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-3 group reveal shadow-xl shadow-black/20 delay-400">
                             Contact Support
                             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </button>

@@ -103,22 +103,22 @@ const PillarsOfSupport = () => {
             <div className="relative z-10 max-w-7xl w-full px-6 md:px-12 lg:px-24">
                 {/* Header Section */}
                 <div className="text-center mb-10 md:mb-12">
-                    <div className="flex items-center justify-center gap-3 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                    <div className="flex items-center justify-center gap-3 reveal delay-100">
                         <div className="w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)] animate-pulse" />
                         <span className="text-blue-600 font-bold tracking-[0.25em] uppercase text-[10px] md:text-xs">
                             Core Initiatives
                         </span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-slate-900 mt-4 mb-4 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-slate-900 mt-4 mb-4 reveal delay-200">
                         Five Pillars of <span className="text-blue-600">Support.</span>
                     </h2>
-                    <p className="max-w-2xl mx-auto text-slate-500 text-sm md:text-base leading-relaxed body-light opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                    <p className="max-w-2xl mx-auto text-slate-500 text-sm md:text-base leading-relaxed body-light reveal delay-300">
                         We focus on the essential aspects of a driver's life, ensuring comprehensive support where it matters most—on and off the road.
                     </p>
                 </div>
 
                 {/* Interactive Section */}
-                <div className="flex flex-col lg:flex-row gap-8 items-stretch opacity-0 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                <div className="flex flex-col lg:flex-row gap-8 items-stretch reveal delay-400">
 
                     {/* Sidebar Navigation */}
                     <div className="w-full lg:w-1/3 flex flex-col gap-3">

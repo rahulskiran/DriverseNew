@@ -1,8 +1,10 @@
-import React from 'react';
-import { Menu, MoveRight, Truck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, MoveRight, Truck, X } from 'lucide-react';
 import Button from './Button';
 
 const Hero = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     const navLinks = [
         { name: "Our Foundation", href: "#foundation" },
         { name: "Programs", href: "#programs" },
@@ -10,8 +12,21 @@ const Hero = () => {
         { name: "FAQ", href: "#faq" }
     ];
 
+    // Prevent scrolling when menu is open
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMenuOpen]);
+
     const handleNavClick = (e, href) => {
         e.preventDefault();
+        setIsMenuOpen(false); // Close menu on click
         const target = document.querySelector(href);
         if (target) {
             const offsetTop = target.offsetTop - 100; // Account for fixed header
@@ -26,7 +41,7 @@ const Hero = () => {
         <div className="font-inter text-white bg-[#020617]">
             {/* Navigation Header */}
             <header className="fixed top-0 left-0 w-full z-50 p-4 md:p-8 flex justify-center">
-                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2 md:px-8 md:py-2.5 flex items-center justify-between shadow-2xl">
+                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2 md:px-8 md:py-2.5 flex items-center justify-between shadow-2xl relative z-50">
                     <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer group/logo">
                         <div className="p-2 bg-[#0071e3] rounded-xl shadow-lg shadow-blue-500/20">
                             <Truck className="h-4 w-4 md:h-5 md:w-5 text-white" />
@@ -34,6 +49,7 @@ const Hero = () => {
                         <span className="text-xl md:text-2xl font-semibold tracking-tight">Driverse</span>
                     </a>
 
+                    {/* Desktop Navigation */}
                     <div className="hidden lg:flex items-center gap-10">
                         {navLinks.map((link) => (
                             <a
@@ -63,11 +79,63 @@ const Hero = () => {
                         >
                             Donate Now
                         </Button>
-                        <button className="lg:hidden p-2.5 hover:bg-white/10 transition-colors">
-                            <Menu className="h-5 w-5 text-white" />
+
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            className="lg:hidden p-2.5 hover:bg-white/10 transition-colors rounded-full"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            {isMenuOpen ? (
+                                <X className="h-5 w-5 text-white" />
+                            ) : (
+                                <Menu className="h-5 w-5 text-white" />
+                            )}
                         </button>
                     </div>
                 </nav>
+
+                {/* Mobile Menu Overlay */}
+                <div
+                    className={`fixed inset-0 z-40 bg-[#020617]/95 backdrop-blur-xl transition-all duration-500 lg:hidden flex flex-col items-center justify-center ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+                        }`}
+                >
+                    <nav className="flex flex-col items-center gap-8 w-full px-6">
+                        {navLinks.map((link, idx) => (
+                            <a
+                                key={link.name}
+                                href={link.href}
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className={`text-2xl font-bold tracking-tight text-white hover:text-blue-500 transition-all duration-300 transform ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                                    }`}
+                                style={{ transitionDelay: `${idx * 100}ms` }}
+                            >
+                                {link.name}
+                            </a>
+                        ))}
+
+                        <div
+                            className={`mt-8 w-full max-w-xs transition-all duration-500 transform ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                                }`}
+                            style={{ transitionDelay: '400ms' }}
+                        >
+                            <Button
+                                variant="primary"
+                                className="w-full justify-center h-14"
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    const donateSection = document.querySelector('#donate');
+                                    if (donateSection) {
+                                        const offsetTop = donateSection.offsetTop - 100;
+                                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                                    }
+                                }}
+                            >
+                                Donate Now
+                            </Button>
+                        </div>
+                    </nav>
+                </div>
             </header>
 
 
@@ -111,23 +179,23 @@ const Hero = () => {
 
                 {/* Hero Content Area - Bottom-aligned on mobile, left-center on desktop */}
                 <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pt-32 pb-16 md:px-12 lg:px-24 flex flex-col lg:items-start lg:text-left">
-                    <div className="mb-6 lg:mb-8 text-left w-full opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                    <div className="mb-6 lg:mb-8 text-left w-full reveal delay-100">
                         <p className="text-blue-500 font-black text-sm md:text-sm uppercase tracking-[0.05em] drop-shadow-[0_0_12px_rgba(59,158,255,0.8)]">
                             Supporting Drivers, Every Mile
                         </p>
                     </div>
 
-                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left reveal delay-200">
                         Driving Change<br />
                         for the Heroes.
                     </h1>
 
-                    <p className="text-white/60 text-base md:text-base lg:text-lg mb-12 leading-relaxed max-w-2xl lg:max-w-xl body-light text-left opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                    <p className="text-white/60 text-base md:text-base lg:text-lg mb-12 leading-relaxed max-w-2xl lg:max-w-xl body-light text-left reveal delay-300">
                         We are dedicated to the health, safety, and well-being of truck drivers.
                         Providing the essential resources needed to keep our global supply chain moving forward.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:max-w-md lg:max-w-4xl opacity-0 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:max-w-md lg:max-w-4xl reveal delay-400">
                         <Button
                             variant="primary"
                             className="lg:w-fit lg:h-14 lg:text-base"

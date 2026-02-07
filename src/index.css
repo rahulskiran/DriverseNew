@@ -219,15 +219,24 @@
     animation: fadeInUp 0.8s ease-out forwards;
 }
 
-/* Sections start hidden */
-section[data-animate] {
+/* Reveal on Scroll */
+.reveal {
     opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease-out;
 }
 
-/* Visible class triggers animation */
-section[data-animate].visible {
-    animation: fadeInUp 0.8s ease-out forwards;
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
 }
+
+/* Staggered Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
 
 /* Layout Stability Improvements */
 img {

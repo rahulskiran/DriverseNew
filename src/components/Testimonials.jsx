@@ -84,22 +84,22 @@ const Testimonials = () => {
 
             {/* Header Section */}
             <div className="max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-24 mb-8 md:mb-10 relative z-10 text-center lg:text-left">
-                <div className="flex items-center justify-center lg:justify-start gap-3 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                <div className="flex items-center justify-center lg:justify-start gap-3 reveal delay-100">
                     <div className="w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)] animate-pulse" />
                     <span className="text-blue-600 font-bold tracking-[0.25em] uppercase text-[10px] md:text-xs">
                         Voices from the Road
                     </span>
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-slate-900 mt-4 md:max-w-2xl opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl heading-display text-slate-900 mt-4 md:max-w-2xl reveal delay-200">
                     Real Stories, <span className="text-blue-600">Real Impact.</span>
                 </h2>
             </div>
 
             {/* Marquee Rows Container */}
-            <div className="relative z-10 space-y-2 md:space-y-3">
-                {/* Lateral Fades for Premium "Contained" Look - Increased Dissolve */}
-                <div className="absolute inset-y-0 left-0 w-20 md:w-48 lg:w-64 bg-gradient-to-r from-white via-white/90 to-transparent z-20 pointer-events-none" />
-                <div className="absolute inset-y-0 right-0 w-20 md:w-48 lg:w-64 bg-gradient-to-l from-white via-white/90 to-transparent z-20 pointer-events-none" />
+            <div className="relative z-10 space-y-2 md:space-y-3 reveal delay-300">
+                {/* Lateral Fades for Premium "Contained" Look - Reduced density as per feedback */}
+                <div className="absolute inset-y-0 left-0 w-12 md:w-24 lg:w-32 bg-gradient-to-r from-white via-white/60 to-transparent z-20 pointer-events-none" />
+                <div className="absolute inset-y-0 right-0 w-12 md:w-24 lg:w-32 bg-gradient-to-l from-white via-white/60 to-transparent z-20 pointer-events-none" />
 
                 {/* Marquee Row 1: Right to Left */}
                 <div className="flex overflow-hidden group select-none relative">
