@@ -42,7 +42,20 @@ export async function createCheckoutSession(amount, donorInfo = {}) {
 }
 
 export function redirectToCheckout(checkoutUrl) {
-  if (!checkoutUrl) {
+  if (!checkoutUrl || typeof checkoutUrl !== 'string') {
+    throw new Error('Invalid checkout URL');
+  }
+  let parsed;
+  try {
+    parsed = new URL(checkoutUrl, window.location.origin);
+  } catch {
+    throw new Error('Invalid checkout URL');
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Invalid checkout URL');
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (!host.endsWith('.stripe.com') && host !== 'stripe.com') {
     throw new Error('Invalid checkout URL');
   }
   window.location.href = checkoutUrl;

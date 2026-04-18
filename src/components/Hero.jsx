@@ -185,7 +185,7 @@ const Hero = () => {
                         </p>
                     </div>
 
-                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left reveal delay-200">
+                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left reveal delay-200">
                         Driving Change<br />
                         for the Heroes.
                     </h1>

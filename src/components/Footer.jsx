@@ -11,9 +11,10 @@ const Footer = () => {
             alert('Please enter a valid email address.');
             return;
         }
+        window.location.href = `mailto:contact@driversefoundation.org?subject=Newsletter&body=Please%20add%20me%20to%20the%20newsletter%3A%20${encodeURIComponent(email)}`;
         setSubscribed(true);
         setEmail('');
-        setTimeout(() => setSubscribed(false), 3000);
+        setTimeout(() => setSubscribed(false), 5000);
     };
 
     return (
@@ -49,11 +50,15 @@ const Footer = () => {
                             A non-profit organization dedicated to the unsung heroes of our highways. Empowering truck drivers through health, wellness, and safety initiatives.
                         </p>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4" aria-label="Social media (links not yet configured)">
                             {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                                <a key={i} href="#" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 hover:border-blue-500 transition-all duration-300 shadow-xl">
+                                <span
+                                    key={i}
+                                    className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 cursor-not-allowed opacity-70"
+                                    title="Social links coming soon"
+                                >
                                     <Icon size={18} />
-                                </a>
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -66,7 +71,7 @@ const Footer = () => {
                         <ul className="space-y-4">
                             {['Health & Wellness', 'Safety Training', 'Peer Support', 'Newcomer Guide', 'Crisis Pathways'].map((link) => (
                                 <li key={link}>
-                                    <a href="#" className="text-slate-400 hover:text-blue-500 text-sm transition-colors duration-300 flex items-center gap-2 group">
+                                    <a href="#programs" className="text-slate-400 hover:text-blue-500 text-sm transition-colors duration-300 flex items-center gap-2 group">
                                         <div className="w-1 h-1 rounded-full bg-blue-500/50 group-hover:bg-blue-500 transition-colors" />
                                         {link}
                                     </a>
@@ -86,16 +91,19 @@ const Footer = () => {
                                     <MapPin size={18} />
                                 </div>
                                 <span className="text-slate-400 text-sm leading-relaxed max-w-[200px]">
-                                    123 Transport Boulevard, Logistics District, TC 90210
+                                    United States — mailing address available on request via email.
                                 </span>
                             </li>
                             <li className="flex items-center gap-4">
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500">
                                     <Phone size={18} />
                                 </div>
-                                <span className="text-slate-400 text-sm font-bold">
-                                    +1 (555) 123-4567
-                                </span>
+                                <a
+                                    href="mailto:contact@driversefoundation.org?subject=Callback%20request"
+                                    className="text-slate-400 text-sm hover:text-blue-400 transition-colors"
+                                >
+                                    Email us to request a call back
+                                </a>
                             </li>
                             <li className="flex items-center gap-4">
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500">
@@ -135,7 +143,7 @@ const Footer = () => {
                             >
                                 {subscribed ? (
                                     <>
-                                        Subscribed! ✓
+                                        Opening email… ✓
                                     </>
                                 ) : (
                                     <>
@@ -168,7 +176,11 @@ const Footer = () => {
 
                     <div className="flex items-center gap-6 md:gap-8">
                         {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((link) => (
-                            <a key={link} href="#" className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors">
+                            <a
+                                key={link}
+                                href={`mailto:contact@driversefoundation.org?subject=${encodeURIComponent(link)}`}
+                                className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
+                            >
                                 {link}
                             </a>
                         ))}

@@ -17,7 +17,7 @@ const SuccessPage = () => {
 
         <p className="text-slate-600 mb-6">
           Your generous contribution helps us support driver safety, health, and wellness
-          programs. A receipt has been sent to your email.
+          programs. Stripe emails a payment receipt to the address you entered at checkout.
         </p>
 
         <div className="bg-slate-50 rounded-xl p-4 mb-6">

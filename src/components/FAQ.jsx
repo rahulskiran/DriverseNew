@@ -40,7 +40,7 @@ const FAQ = () => {
     const faqs = [
         {
             question: "How can I apply for financial assistance?",
-            answer: "Applications can be submitted through our secure portal. You'll need to provide proof of CDL status and documentation of the hardship. Our review committee typically responds within 48-72 hours for urgent cases."
+            answer: "Email us at contact@driversefoundation.org with a short description of your situation. We may ask for proof of CDL status and documentation of the hardship. We aim to respond within 48–72 hours for urgent cases."
         },
         {
             question: "Are the safety workshops free for all drivers?",
@@ -48,11 +48,11 @@ const FAQ = () => {
         },
         {
             question: "I am a new driver. How do I find a mentor?",
-            answer: "Our Newcomer Pathway program connects rookies with veterans based on their specific equipment type and route preferences. Simply sign up in the 'Mentorship' section of our app to get started."
+            answer: "Our Newcomer Pathway program connects rookies with veterans when capacity allows. Email contact@driversefoundation.org with your equipment type and route preferences and we’ll follow up."
         },
         {
             question: "Is my donation tax-deductible?",
-            answer: "Absolutely. The Driverse Foundation is a registered 501(c)(3) non-profit organization. Every donation is tax-deductible to the full extent allowed by law, and you'll receive a receipt immediately."
+            answer: "If your organization has 501(c)(3) status, donations are generally tax-deductible in the U.S. to the extent allowed by law. Stripe emails a payment receipt; keep it for your records and confirm with your tax advisor."
         }
     ];
 
@@ -94,10 +94,13 @@ const FAQ = () => {
                             We know you don't have time to waste. Here are quick answers to the most common questions about our programs and assistance.
                         </p>
 
-                        <button className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-3 group reveal shadow-xl shadow-black/20 delay-400">
+                        <a
+                            href="mailto:contact@driversefoundation.org?subject=Support%20request"
+                            className="inline-flex px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-sm transition-all duration-300 items-center gap-3 group reveal shadow-xl shadow-black/20 delay-400"
+                        >
                             Contact Support
                             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                        </button>
+                        </a>
                     </div>
 
                     {/* Right Column: Accordion */}

@@ -146,7 +146,7 @@ const DonationSection = () => {
                     <div className="flex flex-wrap justify-center gap-x-4 md:gap-x-6 gap-y-2 mb-6 md:mb-8 text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                            Tax Exempt 501(c)(3)
+                            Tax-deductible if applicable
                         </div>
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
                             <Lock className="w-3 h-3 text-blue-500" />

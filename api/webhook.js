@@ -36,13 +36,13 @@ export default async function handler(req, res) {
   const sig = req.headers['stripe-signature'];
   let event;
 
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set — refusing webhook (prevents forged payment events)');
+    return res.status(503).json({ error: 'Webhook not configured' });
+  }
+
   try {
-    if (webhookSecret) {
-      event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
-    } else {
-      console.warn('STRIPE_WEBHOOK_SECRET not set; skipping signature verification');
-      event = JSON.parse(payload);
-    }
+    event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).json({ error: 'Invalid signature' });
