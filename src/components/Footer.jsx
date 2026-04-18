@@ -37,14 +37,25 @@ const Footer = () => {
 
                     {/* Column 1: Logo & About */}
                     <div className="flex flex-col items-start">
-                        <div className="flex items-center gap-2 mb-8 group cursor-pointer">
-                            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-                                <span className="text-xl font-black">D</span>
-                            </div>
-                            <span className="text-2xl font-bold tracking-tight text-white">
-                                Driverse<span className="text-blue-500">Foundation</span>
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="flex items-center gap-2 mb-8 group cursor-pointer"
+                        >
+                            <img
+                                src="/images/driverse-header-logo.png"
+                                alt="Driverse"
+                                className="h-5 w-auto shrink-0 md:h-6"
+                                width={1453}
+                                height={292}
+                            />
+                            <span className="text-2xl font-bold tracking-tight text-blue-500">
+                                Foundation
                             </span>
-                        </div>
+                        </a>
 
                         <p className="text-slate-400 text-sm leading-relaxed mb-10 max-w-xs body-light opacity-80">
                             A non-profit organization dedicated to the unsung heroes of our highways. Empowering truck drivers through health, wellness, and safety initiatives.
