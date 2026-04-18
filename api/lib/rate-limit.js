@@ -19,7 +19,7 @@ function getLimiter() {
     ratelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(MAX_REQUESTS, '1 m'),
-      analytics: true,
+      analytics: false,
       prefix: 'ratelimit:checkout',
     });
   }

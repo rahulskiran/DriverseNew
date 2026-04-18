@@ -64,8 +64,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const ip = getClientIp(req);
-  const { success: withinLimit, reset } = await limitCheckoutSession(`checkout:${ip}`);
+  let withinLimit = true;
+  let reset;
+  try {
+    const ip = getClientIp(req);
+    const rl = await limitCheckoutSession(`checkout:${ip}`);
+    withinLimit = rl.success;
+    reset = rl.reset;
+  } catch (err) {
+    console.error('Rate limit error (failing open):', err);
+  }
   if (!withinLimit) {
     const retrySec = reset ? Math.max(1, Math.ceil((reset - Date.now()) / 1000)) : 60;
     res.setHeader('Retry-After', String(retrySec));
@@ -80,9 +88,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Payment configuration error' });
   }
 
-  const stripe = new Stripe(secret);
-
   try {
+    const stripe = new Stripe(secret.trim());
     const { amount, donorInfo = {} } = req.body || {};
 
     if (amount == null || Number(amount) < 1 || Number(amount) > 100000) {
@@ -122,9 +129,16 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Stripe checkout error:', error);
     const isProd = process.env.VERCEL_ENV === 'production';
+    const msg = error && error.message ? String(error.message) : 'unknown error';
+    if (!isProd && /invalid api key/i.test(msg)) {
+      return res.status(500).json({
+        error: 'Payment configuration error',
+        message: 'Check STRIPE_SECRET_KEY in Vercel (no extra spaces or quotes).',
+      });
+    }
     return res.status(500).json({
       error: 'Failed to create checkout session',
-      ...(isProd ? {} : { message: error.message }),
+      ...(isProd ? {} : { message: msg }),
     });
   }
 }
