@@ -30,9 +30,6 @@ dist-ssr
 .env.production
 .env.development
 
-# Local Netlify folder
-.netlify
-
 # Stripe keys (if stored separately)
 stripe-keys.json
 secrets.json

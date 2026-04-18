@@ -15,20 +15,8 @@ export default defineConfig([
     },
   },
   {
-    files: ['netlify/functions/**/*.js'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.node,
-      sourceType: 'commonjs',
-    },
-    rules: {
-      'no-case-declarations': 'off',
-      'no-undef': 'off',
-    },
-  },
-  {
     files: ['**/*.{js,jsx}'],
-    ignores: ['api/**', 'netlify/functions/**'],
+    ignores: ['api/**'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,

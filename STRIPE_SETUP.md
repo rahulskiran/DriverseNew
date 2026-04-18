@@ -4,9 +4,9 @@
 This project uses **Stripe Checkout** for secure payment processing. The integration follows PCI DSS compliance standards and uses server-side session creation for maximum security.
 
 ## Architecture
-- **Frontend**: React + Vite with Stripe.js for client-side tokenization
-- **Backend**: Netlify Functions for secure server-side operations
-- **Security**: Content Security Policy, HSTS, XSS protection enabled
+- **Frontend**: React + Vite; donations call your API then redirect to **Stripe Checkout** (hosted)
+- **Backend**: **Vercel** serverless routes under `api/` (`create-checkout-session`, `webhook`)
+- **Security**: Webhook signature verification, server-side amount limits, CORS on checkout API
 
 ## Setup Instructions
 
@@ -22,47 +22,47 @@ This project uses **Stripe Checkout** for secure payment processing. The integra
 Create a `.env` file in the project root:
 
 ```env
-# Client-side (safe to expose, used in browser)
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+# Optional: override checkout API URL (default `/api/create-checkout-session` on Vercel)
+# VITE_STRIPE_API_URL=https://your-domain.com/api/create-checkout-session
 
-# Server-side (NEVER expose in client code)
+# Server-side (NEVER expose in client code) — set in Vercel Project → Settings → Environment Variables
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Production: canonical site URL for success/cancel redirects
+# SITE_URL=https://your-domain.com
 ```
 
 **⚠️ SECURITY WARNING**: Never commit the `.env` file to git!
 
-### 3. Configure Netlify Environment Variables
+### 3. Configure Vercel environment variables
 
-When deploying to Netlify, set these in your site settings:
+In **Vercel** → your project → **Settings** → **Environment Variables**, add:
 
 | Variable | Value | Context |
 |----------|-------|---------|
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` | Production |
-| `STRIPE_SECRET_KEY` | `sk_live_...` | Production |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production |
-| `NODE_ENV` | `production` | All |
+| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Production / Preview as needed |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production / Preview as needed |
+| `SITE_URL` | `https://your-domain.com` | Production (no trailing slash) |
 
-### 4. Configure Stripe Webhook
+### 4. Configure Stripe webhook
 
-1. In your Stripe Dashboard, go to Developers → Webhooks
-2. Add endpoint: `https://your-site.netlify.app/.netlify/functions/webhook`
+1. In Stripe Dashboard → **Developers** → **Webhooks**
+2. Add endpoint: `https://your-domain.com/api/webhook` (your deployed Vercel URL)
 3. Select events:
    - `checkout.session.completed`
    - `checkout.session.async_payment_failed`
-4. Copy the webhook secret and add to environment variables
+4. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel
 
-### 5. Test the Integration
+### 5. Test the integration
 
 ```bash
-# Run locally
 npm run dev
-
-# In another terminal, test the function
-netlify dev
 ```
 
-Visit `http://localhost:5173/donate` and test a donation.
+For full local API testing, use Vercel CLI (`vercel dev`) so `/api/*` routes run, or deploy to a preview URL and test there.
+
+Visit `/donate` and run a test donation.
 
 ## Security Features
 
@@ -101,20 +101,17 @@ Use these test card numbers in development:
 ## Going Live
 
 1. Switch to **Live Mode** in Stripe Dashboard
-2. Replace test keys with live keys in Netlify environment variables
+2. Replace test keys with live keys in Vercel environment variables
 3. Update webhook endpoint to production URL
 4. Test with a small real payment ($1)
 5. Enable tax receipts if needed
 
 ## Troubleshooting
 
-### "No publishable key configured"
-- Check `.env` file exists with `VITE_STRIPE_PUBLISHABLE_KEY`
-- Restart dev server after adding env vars
-
 ### "Failed to create checkout session"
-- Verify `STRIPE_SECRET_KEY` is set in Netlify environment variables
-- Check function logs in Netlify Dashboard
+- Verify `STRIPE_SECRET_KEY` is set in Vercel (and redeploy after changing env)
+- In local dev, ensure `/api/create-checkout-session` is reachable (e.g. `vercel dev`)
+- Check **Vercel** → project → **Logs** for the function
 
 ### Webhook failures
 - Verify webhook secret matches `STRIPE_WEBHOOK_SECRET`
