@@ -237,14 +237,6 @@
 .delay-400 { transition-delay: 400ms; }
 .delay-500 { transition-delay: 500ms; }
 
-/* Layout Stability Improvements */
-img {
-    /* Prevent layout shifts from images */
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
 /* Prevent cumulative layout shift */
 section {
     contain: layout style;

@@ -46,7 +46,7 @@ const Hero = () => {
                         <img
                             src="/images/driverse-logo-white.png"
                             alt="Driverse"
-                            className="h-7 w-auto md:h-8"
+                            className="h-7 w-auto max-h-8 shrink-0 md:h-8"
                             width={1563}
                             height={1563}
                         />
