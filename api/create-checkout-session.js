@@ -2,6 +2,7 @@
  * Vercel Serverless: create Stripe Checkout Session (hosted).
  */
 import Stripe from 'stripe';
+import { getClientIp, limitCheckoutSession } from './lib/rate-limit.js';
 
 function siteOrigin() {
   const site = process.env.SITE_URL?.trim();
@@ -61,6 +62,16 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const ip = getClientIp(req);
+  const { success: withinLimit, reset } = await limitCheckoutSession(`checkout:${ip}`);
+  if (!withinLimit) {
+    const retrySec = reset ? Math.max(1, Math.ceil((reset - Date.now()) / 1000)) : 60;
+    res.setHeader('Retry-After', String(retrySec));
+    return res.status(429).json({
+      error: 'Too many donation attempts. Please wait a moment and try again.',
+    });
   }
 
   const secret = process.env.STRIPE_SECRET_KEY;

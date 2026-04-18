@@ -6,7 +6,7 @@ This project uses **Stripe Checkout** for secure payment processing. The integra
 ## Architecture
 - **Frontend**: React + Vite; donations call your API then redirect to **Stripe Checkout** (hosted)
 - **Backend**: **Vercel** serverless routes under `api/` (`create-checkout-session`, `webhook`)
-- **Security**: Webhook signature verification, server-side amount limits, CORS on checkout API
+- **Security**: Webhook signature verification, server-side amount limits, CORS on checkout API, optional **rate limiting** (Upstash) on `create-checkout-session`
 
 ## Setup Instructions
 
@@ -31,9 +31,16 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 
 # Production: canonical site URL for success/cancel redirects
 # SITE_URL=https://your-domain.com
+
+# Rate limiting (production recommended) — create a free Redis on https://console.upstash.com
+# UPSTASH_REDIS_REST_URL=...
+# UPSTASH_REDIS_REST_TOKEN=...
+# RATE_LIMIT_CHECKOUT_PER_MINUTE=15
 ```
 
 **⚠️ SECURITY WARNING**: Never commit the `.env` file to git!
+
+Without Upstash env vars, rate limiting is **disabled** (fine for local dev). **Enable in Vercel production** to cap checkout-session abuse per IP.
 
 ### 3. Configure Vercel environment variables
 
@@ -44,6 +51,9 @@ In **Vercel** → your project → **Settings** → **Environment Variables**, a
 | `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Production / Preview as needed |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production / Preview as needed |
 | `SITE_URL` | `https://your-domain.com` | Production (no trailing slash) |
+| `UPSTASH_REDIS_REST_URL` | From [Upstash console](https://console.upstash.com) | Production (recommended) |
+| `UPSTASH_REDIS_REST_TOKEN` | From Upstash console | Production (recommended) |
+| `RATE_LIMIT_CHECKOUT_PER_MINUTE` | e.g. `15` | Optional; default 15 requests/min/IP |
 
 ### 4. Configure Stripe webhook
 
@@ -74,6 +84,7 @@ Visit `/donate` and run a test donation.
 - ✅ HSTS (HTTP Strict Transport Security)
 - ✅ Webhook signature verification
 - ✅ Amount validation (server-side)
+- ✅ Rate limiting on checkout API (when Upstash is configured)
 - ✅ No sensitive data stored on servers
 
 ### Client-Side Security
@@ -87,6 +98,7 @@ Visit `/donate` and run a test donation.
 - Webhook signature verification
 - CORS restrictions on API endpoints
 - Request validation and sanitization
+- Per-IP sliding-window limits on `/api/create-checkout-session` (Upstash)
 
 ## Testing Cards (Test Mode)
 
