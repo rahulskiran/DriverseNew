@@ -41,14 +41,14 @@ const Hero = () => {
         <div className="font-inter text-white bg-[#020617]">
             {/* Navigation Header */}
             <header className="fixed top-0 left-0 w-full z-50 p-4 md:p-8 flex justify-center">
-                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2 md:px-8 md:py-2.5 flex items-center justify-between shadow-2xl relative z-50">
+                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2.5 md:px-8 md:py-3 flex items-center justify-between shadow-2xl relative z-50">
                     <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center cursor-pointer group/logo">
                         <img
-                            src="/images/driverse-logo-white.png"
+                            src="/images/driverse-header-logo.png"
                             alt="Driverse"
-                            className="h-7 w-auto max-h-8 shrink-0 md:h-8"
-                            width={1563}
-                            height={1563}
+                            className="h-10 w-auto shrink-0 sm:h-11 md:h-12 lg:h-14"
+                            width={1453}
+                            height={292}
                         />
                     </a>
 
