@@ -1,30 +1,8 @@
 /**
- * Stripe Configuration
- * Securely loads Stripe with publishable key from environment
+ * Stripe Checkout (hosted) — session is created on the server; client only redirects.
  */
 
-import { loadStripe } from '@stripe/stripe-js';
-
-// Validate environment variable exists
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-
-if (!publishableKey) {
-  console.warn('Stripe publishable key is not configured. Set VITE_STRIPE_PUBLISHABLE_KEY in your .env file');
-}
-
-// Initialize Stripe with publishable key (safe for client-side)
-export const stripePromise = publishableKey
-  ? loadStripe(publishableKey)
-  : Promise.resolve(null);
-
-/**
- * Create a checkout session by calling the backend API
- * @param {number} amount - Donation amount in dollars
- * @param {Object} donorInfo - Optional donor information
- * @returns {Promise<{sessionId: string, url: string}>}
- */
 export async function createCheckoutSession(amount, donorInfo = {}) {
-  // Validate amount
   const donationAmount = parseFloat(amount);
   if (isNaN(donationAmount) || donationAmount < 1 || donationAmount > 100000) {
     throw new Error('Invalid donation amount. Must be between $1 and $100,000');
@@ -43,18 +21,26 @@ export async function createCheckoutSession(amount, donorInfo = {}) {
     }),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create checkout session');
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    const snippet = text.replace(/\s+/g, ' ').slice(0, 120);
+    throw new Error(
+      response.ok
+        ? `Payment server returned non-JSON (is /api wired on Vercel?). ${snippet}`
+        : `Server error (${response.status}). ${snippet}`
+    );
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.message || 'Failed to create checkout session');
+  }
+
+  return data;
 }
 
-/**
- * Redirect to Stripe Checkout
- * @param {string} checkoutUrl - The Stripe checkout URL
- */
 export function redirectToCheckout(checkoutUrl) {
   if (!checkoutUrl) {
     throw new Error('Invalid checkout URL');

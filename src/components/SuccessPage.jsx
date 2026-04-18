@@ -1,32 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import React from 'react';
 import { CheckCircle, Heart, ArrowLeft } from 'lucide-react';
 
 const SuccessPage = () => {
-  const [searchParams] = useSearchParams();
-  const [sessionDetails, setSessionDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const sessionId = searchParams.get('session_id');
-
-  useEffect(() => {
-    if (sessionId) {
-      // In production, you might want to verify the session with your backend
-      setTimeout(() => {
-        setSessionDetails({ sessionId });
-        setLoading(false);
-      }, 500);
-    } else {
-      setLoading(false);
-    }
-  }, [sessionId]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center px-4">
@@ -34,14 +10,14 @@ const SuccessPage = () => {
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-8 h-8 text-green-600" />
         </div>
-        
+
         <h1 className="text-2xl font-bold text-slate-900 mb-2">
           Thank You for Your Donation!
         </h1>
-        
+
         <p className="text-slate-600 mb-6">
-          Your generous contribution helps us support driver safety, health, and wellness programs. 
-          A receipt has been sent to your email.
+          Your generous contribution helps us support driver safety, health, and wellness
+          programs. A receipt has been sent to your email.
         </p>
 
         <div className="bg-slate-50 rounded-xl p-4 mb-6">
@@ -54,13 +30,13 @@ const SuccessPage = () => {
           </p>
         </div>
 
-        <Link 
-          to="/"
+        <a
+          href="/"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Return to Homepage
-        </Link>
+        </a>
       </div>
     </div>
   );

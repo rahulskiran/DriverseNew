@@ -7,7 +7,28 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist']),
   {
+    files: ['api/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.node,
+      sourceType: 'module',
+    },
+  },
+  {
+    files: ['netlify/functions/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.node,
+      sourceType: 'commonjs',
+    },
+    rules: {
+      'no-case-declarations': 'off',
+      'no-undef': 'off',
+    },
+  },
+  {
     files: ['**/*.{js,jsx}'],
+    ignores: ['api/**', 'netlify/functions/**'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,
