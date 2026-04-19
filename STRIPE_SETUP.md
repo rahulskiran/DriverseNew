@@ -5,8 +5,11 @@ This project uses **Stripe Checkout** for secure payment processing. The integra
 
 ## Architecture
 - **Frontend**: React + Vite; donations call your API then redirect to **Stripe Checkout** (hosted)
-- **Backend**: **Vercel** serverless routes under `api/` (`create-checkout-session`, `webhook`)
-- **Security**: Webhook signature verification, server-side amount limits, CORS on checkout API, optional **rate limiting** (Upstash) on `create-checkout-session`
+- **Backend**: **Vercel** serverless routes under `api/`:
+  - `POST /api/create-checkout-session` — creates a session (rate-limited, Turnstile-gated, idempotent)
+  - `GET  /api/checkout-session?id=cs_…` — verifies a session by re-fetching from Stripe (used by the success page)
+  - `POST /api/webhook` — Stripe webhook receiver (signature-verified, deduped by `event.id`)
+- **Security**: Strict CORS allow-list, Cloudflare Turnstile bot check, per-IP sliding-window rate limit, Stripe API version pinned, request idempotency keys, webhook idempotency dedupe via Upstash, server-side session re-fetch.
 
 ## Setup Instructions
 
@@ -22,25 +25,36 @@ This project uses **Stripe Checkout** for secure payment processing. The integra
 Create a `.env` file in the project root:
 
 ```env
-# Optional: override checkout API URL (default `/api/create-checkout-session` on Vercel)
-# VITE_STRIPE_API_URL=https://your-domain.com/api/create-checkout-session
-
 # Server-side (NEVER expose in client code) — set in Vercel Project → Settings → Environment Variables
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 
-# Production: canonical site URL for success/cancel redirects
-# SITE_URL=https://your-domain.com
+# REQUIRED in production AND preview — used for CORS allow-list and Stripe redirect URLs
+SITE_URL=https://your-domain.com
 
-# Rate limiting (production recommended) — create a free Redis on https://console.upstash.com
-# UPSTASH_REDIS_REST_URL=...
-# UPSTASH_REDIS_REST_TOKEN=...
+# Cloudflare Turnstile — REQUIRED in production
+# Frontend site key (must be VITE_-prefixed to be available to the bundle)
+VITE_TURNSTILE_SITE_KEY=0xAAAAAAAAAAAAAAAAAAAAAA
+# Server secret used to verify the token at /turnstile/v0/siteverify
+TURNSTILE_SECRET_KEY=0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+
+# Upstash Redis — REQUIRED in production (rate limit + webhook idempotency)
+UPSTASH_REDIS_REST_URL=https://xxxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=xxxx
+# Optional overrides
 # RATE_LIMIT_CHECKOUT_PER_MINUTE=15
+# RATE_LIMIT_VERIFY_PER_MINUTE=30
 ```
 
 **⚠️ SECURITY WARNING**: Never commit the `.env` file to git!
 
-Without Upstash env vars, rate limiting is **disabled** (fine for local dev). **Enable in Vercel production** to cap checkout-session abuse per IP.
+Production fail-closed behavior:
+
+- Missing `SITE_URL` → all browser CORS rejected.
+- Missing `TURNSTILE_SECRET_KEY` → `/api/create-checkout-session` returns 403 for every request.
+- Missing Upstash env vars → rate limiter and webhook idempotency return 503.
+
+In local dev (no `VERCEL_ENV`), all three degrade gracefully so you can iterate without external services.
 
 ### 3. Configure Vercel environment variables
 
@@ -48,12 +62,15 @@ In **Vercel** → your project → **Settings** → **Environment Variables**, a
 
 | Variable | Value | Context |
 |----------|-------|---------|
-| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Production / Preview as needed |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production / Preview as needed |
-| `SITE_URL` | `https://your-domain.com` | Production (no trailing slash) |
-| `UPSTASH_REDIS_REST_URL` | From [Upstash console](https://console.upstash.com) | Production (recommended) |
-| `UPSTASH_REDIS_REST_TOKEN` | From Upstash console | Production (recommended) |
-| `RATE_LIMIT_CHECKOUT_PER_MINUTE` | e.g. `15` | Optional; default 15 requests/min/IP |
+| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Production / Preview |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production / Preview |
+| `SITE_URL` | `https://your-domain.com` (no trailing slash) | Production / Preview (REQUIRED) |
+| `VITE_TURNSTILE_SITE_KEY` | From [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) | Production / Preview (REQUIRED) |
+| `TURNSTILE_SECRET_KEY` | From Cloudflare Turnstile | Production / Preview (REQUIRED) |
+| `UPSTASH_REDIS_REST_URL` | From [Upstash console](https://console.upstash.com) | Production / Preview (REQUIRED) |
+| `UPSTASH_REDIS_REST_TOKEN` | From Upstash console | Production / Preview (REQUIRED) |
+| `RATE_LIMIT_CHECKOUT_PER_MINUTE` | e.g. `15` | Optional; default 15 |
+| `RATE_LIMIT_VERIFY_PER_MINUTE` | e.g. `30` | Optional; default 30 |
 
 ### 4. Configure Stripe webhook
 
@@ -62,7 +79,10 @@ In **Vercel** → your project → **Settings** → **Environment Variables**, a
 3. Select events:
    - `checkout.session.completed`
    - `checkout.session.async_payment_failed`
+   - `charge.refunded`
+   - `charge.dispute.created`
 4. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel
+5. Pin the API version on the webhook to **the same value used in code** (see `STRIPE_API_VERSION` constant in `api/create-checkout-session.js` and `api/webhook.js`).
 
 ### 5. Test the integration
 
@@ -77,15 +97,17 @@ Visit `/donate` and run a test donation.
 ## Security Features
 
 ### Implemented
-- ✅ Content Security Policy (CSP) headers
-- ✅ PCI DSS compliant (via Stripe Checkout)
-- ✅ 256-bit SSL encryption
-- ✅ XSS protection headers
-- ✅ HSTS (HTTP Strict Transport Security)
-- ✅ Webhook signature verification
-- ✅ Amount validation (server-side)
-- ✅ Rate limiting on checkout API (when Upstash is configured)
-- ✅ No sensitive data stored on servers
+- ✅ Content Security Policy without `'unsafe-inline'` for scripts
+- ✅ HSTS (HTTP Strict Transport Security) with `includeSubDomains`
+- ✅ Strict CORS allow-list (fail-closed in production)
+- ✅ Cloudflare Turnstile bot challenge (fail-closed in production)
+- ✅ Per-IP sliding-window rate limit (Upstash) using non-spoofable IP source
+- ✅ Stripe API version pinned in code
+- ✅ Idempotency-Key on `checkout.sessions.create` (prevents duplicate sessions on retry)
+- ✅ Webhook signature verification + `event.id` dedupe (Upstash) + re-fetch from Stripe before acting
+- ✅ Strict server-side schema validation for amount, donor name, donor email, session id
+- ✅ Server-side success-page verification (`GET /api/checkout-session?id=…`) — never trust the URL `session_id` alone
+- ✅ Stripe Checkout (hosted) handles all card data — none ever touches our server
 
 ### Client-Side Security
 - Payment data never touches your server

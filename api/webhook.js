@@ -1,14 +1,26 @@
 /**
- * Vercel Serverless: Stripe webhooks (raw body required for signature).
+ * Vercel Serverless: Stripe webhooks.
+ *
+ * - Raw body required for signature verification.
+ * - Stripe API version is pinned.
+ * - event.id is deduped via Upstash Redis so future side effects (DB write,
+ *   email, counter) only run once even on Stripe retries.
  */
 import { buffer } from 'micro';
 import Stripe from 'stripe';
+import { claimEvent } from './lib/idempotency.js';
+
+const STRIPE_API_VERSION = '2024-06-20';
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+function isProd() {
+  return process.env.VERCEL_ENV === 'production';
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -22,8 +34,12 @@ export default async function handler(req, res) {
     console.error('STRIPE_SECRET_KEY is not set');
     return res.status(500).json({ error: 'Server configuration error' });
   }
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set — refusing webhook');
+    return res.status(503).json({ error: 'Webhook not configured' });
+  }
 
-  const stripe = new Stripe(secretKey);
+  const stripe = new Stripe(secretKey, { apiVersion: STRIPE_API_VERSION });
 
   let payload;
   try {
@@ -35,12 +51,6 @@ export default async function handler(req, res) {
 
   const sig = req.headers['stripe-signature'];
   let event;
-
-  if (!webhookSecret) {
-    console.error('STRIPE_WEBHOOK_SECRET is not set — refusing webhook (prevents forged payment events)');
-    return res.status(503).json({ error: 'Webhook not configured' });
-  }
-
   try {
     event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
   } catch (err) {
@@ -48,16 +58,46 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid signature' });
   }
 
+  const claim = await claimEvent(event.id);
+  if (claim.unavailable) {
+    if (isProd()) {
+      console.error(
+        'Idempotency store unavailable — refusing event to avoid double processing'
+      );
+      return res.status(503).json({ error: 'Idempotency store unavailable' });
+    }
+    console.warn('Idempotency store unavailable (dev/preview, processing once)');
+  } else if (!claim.firstSeen) {
+    return res.status(200).json({ received: true, deduped: true });
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object;
-        console.log('Payment successful:', session.id);
+        const sessionRef = event.data.object;
+        // Re-fetch from Stripe to avoid trusting any field on the event payload
+        // for money-affecting decisions.
+        const session = await stripe.checkout.sessions.retrieve(sessionRef.id);
+        if (session.payment_status === 'paid') {
+          console.log(
+            'Payment confirmed:',
+            session.id,
+            session.amount_total,
+            session.currency
+          );
+          // TODO: persist donation record (event.id is already claimed → safe).
+        } else {
+          console.log('Session completed but not paid:', session.id, session.payment_status);
+        }
         break;
       }
       case 'checkout.session.async_payment_failed': {
-        const failedSession = event.data.object;
-        console.error('Payment failed:', failedSession.id);
+        console.error('Async payment failed:', event.data.object.id);
+        break;
+      }
+      case 'charge.refunded':
+      case 'charge.dispute.created': {
+        console.warn(`Stripe event needing attention: ${event.type}`, event.data.object.id);
         break;
       }
       default:

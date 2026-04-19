@@ -2,9 +2,16 @@
  * Stripe Checkout (hosted) — session is created on the server; client only redirects.
  */
 
-export async function createCheckoutSession(amount, donorInfo = {}) {
+function newIdempotencyKey() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+export async function createCheckoutSession(amount, donorInfo = {}, turnstileToken = null) {
   const donationAmount = parseFloat(amount);
-  if (isNaN(donationAmount) || donationAmount < 1 || donationAmount > 100000) {
+  if (!Number.isFinite(donationAmount) || donationAmount < 1 || donationAmount > 100000) {
     throw new Error('Invalid donation amount. Must be between $1 and $100,000');
   }
 
@@ -12,12 +19,12 @@ export async function createCheckoutSession(amount, donorInfo = {}) {
 
   const response = await fetch(apiUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       amount: donationAmount,
       donorInfo,
+      turnstileToken,
+      idempotencyKey: newIdempotencyKey(),
     }),
   });
 
@@ -37,7 +44,6 @@ export async function createCheckoutSession(amount, donorInfo = {}) {
   if (!response.ok) {
     throw new Error(data.error || data.message || 'Failed to create checkout session');
   }
-
   return data;
 }
 
@@ -59,4 +65,28 @@ export function redirectToCheckout(checkoutUrl) {
     throw new Error('Invalid checkout URL');
   }
   window.location.href = checkoutUrl;
+}
+
+const SESSION_ID_RE = /^cs_(test|live)_[A-Za-z0-9]{20,200}$/;
+
+export async function verifyCheckoutSession(sessionId) {
+  if (!SESSION_ID_RE.test(sessionId || '')) {
+    throw new Error('Invalid session id');
+  }
+  const apiUrl =
+    import.meta.env.VITE_STRIPE_VERIFY_URL ||
+    `/api/checkout-session?id=${encodeURIComponent(sessionId)}`;
+
+  const response = await fetch(apiUrl, { method: 'GET' });
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`Server error (${response.status}).`);
+  }
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to verify session');
+  }
+  return data;
 }

@@ -1,8 +1,26 @@
 /**
  * Vercel Serverless: create Stripe Checkout Session (hosted).
+ *
+ * Hardening:
+ *  - Strict CORS allow-list (fail closed).
+ *  - Cloudflare Turnstile bot check (required in production).
+ *  - Rate limit by trusted IP, fails closed in production.
+ *  - Strict body schema validation.
+ *  - Stripe API version pinned + Idempotency-Key per request.
+ *  - Donor email passed as customer_email (Stripe owns the field).
  */
 import Stripe from 'stripe';
-import { getClientIp, limitCheckoutSession } from './lib/rate-limit.js';
+import { applyCors } from './lib/cors.js';
+import { getClientIp, limitCheckoutSession, isProd } from './lib/rate-limit.js';
+import { verifyTurnstile } from './lib/turnstile.js';
+import {
+  validateAmount,
+  validateDonorInfo,
+  validateIdempotencyKey,
+  validateTurnstileToken,
+} from './lib/validate.js';
+
+const STRIPE_API_VERSION = '2024-06-20';
 
 function siteOrigin() {
   const site = process.env.SITE_URL?.trim();
@@ -12,67 +30,33 @@ function siteOrigin() {
   return 'http://localhost:5173';
 }
 
-function hostMatchesSite(originHeader, siteBase) {
-  try {
-    const o = new URL(originHeader).hostname.replace(/^www\./, '');
-    const s = new URL(siteBase.startsWith('http') ? siteBase : `https://${siteBase}`).hostname.replace(/^www\./, '');
-    return o === s;
-  } catch {
-    return false;
-  }
-}
-
-/** Limits browser cross-origin abuse: only your site (or local dev) may call this API from JS. */
-function setCors(req, res) {
-  const site = process.env.SITE_URL?.trim().replace(/\/$/, '');
-  const origin = req.headers.origin;
-
-  if (!origin) {
-    return;
-  }
-
-  let allowed = false;
-  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-    allowed = true;
-  } else if (site && hostMatchesSite(origin, site)) {
-    allowed = true;
-  } else if (process.env.VERCEL_URL) {
-    const previewBase = `https://${process.env.VERCEL_URL.replace(/^https?:\/\//, '')}`;
-    if (hostMatchesSite(origin, previewBase)) {
-      allowed = true;
-    }
-  } else if (!site && process.env.VERCEL_ENV !== 'production') {
-    allowed = true;
-  }
-
-  if (allowed) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-  }
-}
-
 export default async function handler(req, res) {
-  setCors(req, res);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  const cors = applyCors(req, res);
 
   if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+    return res.status(cors.allowed ? 204 : 403).end();
   }
-
+  if (!cors.allowed) {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const ip = getClientIp(req);
+
   let withinLimit = true;
   let reset;
   try {
-    const ip = getClientIp(req);
     const rl = await limitCheckoutSession(`checkout:${ip}`);
     withinLimit = rl.success;
     reset = rl.reset;
   } catch (err) {
-    console.error('Rate limit error (failing open):', err);
+    if (isProd()) {
+      console.error('Rate limit unavailable in production (failing closed):', err);
+      return res.status(503).json({ error: 'Service temporarily unavailable' });
+    }
+    console.warn('Rate limit unavailable (dev/preview, allowing):', err);
   }
   if (!withinLimit) {
     const retrySec = reset ? Math.max(1, Math.ceil((reset - Date.now()) / 1000)) : 60;
@@ -88,17 +72,32 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Payment configuration error' });
   }
 
-  try {
-    const stripe = new Stripe(secret.trim());
-    const { amount, donorInfo = {} } = req.body || {};
+  const body = req.body || {};
+  const amountCheck = validateAmount(body.amount);
+  if (!amountCheck.ok) return res.status(400).json({ error: amountCheck.error });
 
-    if (amount == null || Number(amount) < 1 || Number(amount) > 100000) {
-      return res.status(400).json({ error: 'Invalid donation amount' });
-    }
+  const donorCheck = validateDonorInfo(body.donorInfo);
+  if (!donorCheck.ok) return res.status(400).json({ error: donorCheck.error });
+
+  const idempCheck = validateIdempotencyKey(body.idempotencyKey);
+  if (!idempCheck.ok) return res.status(400).json({ error: idempCheck.error });
+
+  const turnstileCheck = validateTurnstileToken(body.turnstileToken);
+  if (!turnstileCheck.ok) return res.status(400).json({ error: turnstileCheck.error });
+
+  const tsResult = await verifyTurnstile(turnstileCheck.value, ip);
+  if (!tsResult.success) {
+    return res.status(403).json({ error: 'Bot check failed. Please try again.' });
+  }
+
+  try {
+    const stripe = new Stripe(secret.trim(), { apiVersion: STRIPE_API_VERSION });
 
     const origin = siteOrigin();
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
+      mode: 'payment',
       payment_method_types: ['card'],
+      submit_type: 'donate',
       line_items: [
         {
           price_data: {
@@ -108,19 +107,27 @@ export default async function handler(req, res) {
               description:
                 'Thank you for supporting driver safety, health, and wellness programs.',
             },
-            unit_amount: Math.round(Number(amount) * 100),
+            unit_amount: amountCheck.amountMinor,
           },
           quantity: 1,
         },
       ],
-      mode: 'payment',
       success_url: `${origin}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/donate/cancel`,
       metadata: {
-        donor_name: donorInfo.name || 'Anonymous',
-        donor_email: donorInfo.email || 'Not provided',
+        donor_name: donorCheck.value.name || 'Anonymous',
       },
-    });
+    };
+
+    if (donorCheck.value.email) {
+      sessionParams.customer_email = donorCheck.value.email;
+    }
+
+    const requestOptions = idempCheck.value
+      ? { idempotencyKey: `checkout:${idempCheck.value}` }
+      : {};
+
+    const session = await stripe.checkout.sessions.create(sessionParams, requestOptions);
 
     return res.status(200).json({
       sessionId: session.id,
@@ -128,17 +135,6 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Stripe checkout error:', error);
-    const isProd = process.env.VERCEL_ENV === 'production';
-    const msg = error && error.message ? String(error.message) : 'unknown error';
-    if (!isProd && /invalid api key/i.test(msg)) {
-      return res.status(500).json({
-        error: 'Payment configuration error',
-        message: 'Check STRIPE_SECRET_KEY in Vercel (no extra spaces or quotes).',
-      });
-    }
-    return res.status(500).json({
-      error: 'Failed to create checkout session',
-      ...(isProd ? {} : { message: msg }),
-    });
+    return res.status(500).json({ error: 'Failed to create checkout session' });
   }
 }

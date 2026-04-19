@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Heart, ArrowRight, Shield, Lock } from 'lucide-react';
 import { createCheckoutSession, redirectToCheckout } from '../utils/stripe';
+import TurnstileGate, { TURNSTILE_ENABLED } from './TurnstileGate';
 
 const DonationSection = () => {
     const [selectedAmount, setSelectedAmount] = useState(100);
     const [customAmount, setCustomAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState(null);
+    const [turnstileToken, setTurnstileToken] = useState(null);
+    const turnstileRef = useRef(null);
+    const donateDisabled = isProcessing || (TURNSTILE_ENABLED && !turnstileToken);
 
     const presets = [
         { value: 50, impact: "Provides 1 Safety Kit" },
@@ -30,17 +34,20 @@ const DonationSection = () => {
             return;
         }
 
+        if (TURNSTILE_ENABLED && !turnstileToken) {
+            setError("Please complete the bot check above before donating.");
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
-            // Create Stripe Checkout Session via secure backend
-            const { url } = await createCheckoutSession(amount);
-            
-            // Redirect to Stripe's secure checkout page
+            const { url } = await createCheckoutSession(amount, {}, turnstileToken);
             redirectToCheckout(url);
         } catch (err) {
             console.error('Payment error:', err);
             setError(err.message || 'Failed to initialize payment. Please try again.');
+            if (turnstileRef.current) turnstileRef.current.reset();
             setIsProcessing(false);
         }
     };
@@ -148,38 +155,32 @@ const DonationSection = () => {
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                             Tax-deductible if applicable
                         </div>
-                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
-                            <Lock className="w-3 h-3 text-blue-500" />
-                            PCI DSS Compliant
-                        </div>
                         <div className="flex items-center gap-1.5">
-                            <Shield className="w-3 h-3 text-blue-600" />
-                            256-bit SSL Encrypted
+                            <Lock className="w-3 h-3 text-blue-500" />
+                            Card payments handled by Stripe
                         </div>
                     </div>
 
+                    {/* Bot check */}
+                    {TURNSTILE_ENABLED && (
+                        <div className="mb-4 flex justify-center">
+                            <TurnstileGate ref={turnstileRef} onToken={setTurnstileToken} />
+                        </div>
+                    )}
+
                     <button
                         onClick={handleDonation}
-                        disabled={isProcessing}
-                        className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${isProcessing ? 'opacity-70 cursor-wait' : ''}`}
+                        disabled={donateDisabled}
+                        className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${donateDisabled ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                        {isProcessing ? 'Processing...' : 'Process Secure Donation'}
+                        {isProcessing ? 'Processing...' : 'Donate Securely'}
                         {!isProcessing && <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />}
                     </button>
 
-                    {/* Security Footer */}
+                    {/* Footer */}
                     <div className="mt-4 flex flex-col items-center gap-2">
-                        <div className="flex items-center gap-1 text-[9px] text-slate-400 font-medium">
-                            <Lock className="w-3 h-3" />
-                            <span>Powered by</span>
-                            <svg className="w-10 h-3" viewBox="0 0 40 12" fill="currentColor">
-                                <path d="M5 10V4.5a2 2 0 0 1 4 0V10" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                                <text x="12" y="10" fontSize="10" fontWeight="bold">STRIPE</text>
-                            </svg>
-                            <span>| AES-256 Encrypted</span>
-                        </div>
-                        <p className="text-[8px] text-slate-300 text-center">
-                            Your payment information is never stored on our servers
+                        <p className="text-[10px] text-slate-400 text-center">
+                            You will be redirected to Stripe Checkout to complete your donation. We never see or store your card details.
                         </p>
                     </div>
                 </div>
