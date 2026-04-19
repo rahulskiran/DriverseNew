@@ -3,7 +3,6 @@
  *
  * Hardening:
  *  - Strict CORS allow-list (fail closed).
- *  - Cloudflare Turnstile bot check (required in production).
  *  - Rate limit by trusted IP, fails closed in production.
  *  - Strict body schema validation.
  *  - Stripe API version pinned + Idempotency-Key per request.
@@ -12,12 +11,10 @@
 import Stripe from 'stripe';
 import { applyCors } from './lib/cors.js';
 import { getClientIp, limitCheckoutSession, isProd } from './lib/rate-limit.js';
-import { verifyTurnstile } from './lib/turnstile.js';
 import {
   validateAmount,
   validateDonorInfo,
   validateIdempotencyKey,
-  validateTurnstileToken,
 } from './lib/validate.js';
 
 const STRIPE_API_VERSION = '2024-06-20';
@@ -81,14 +78,6 @@ export default async function handler(req, res) {
 
   const idempCheck = validateIdempotencyKey(body.idempotencyKey);
   if (!idempCheck.ok) return res.status(400).json({ error: idempCheck.error });
-
-  const turnstileCheck = validateTurnstileToken(body.turnstileToken);
-  if (!turnstileCheck.ok) return res.status(400).json({ error: turnstileCheck.error });
-
-  const tsResult = await verifyTurnstile(turnstileCheck.value, ip);
-  if (!tsResult.success) {
-    return res.status(403).json({ error: 'Bot check failed. Please try again.' });
-  }
 
   try {
     const stripe = new Stripe(secret.trim(), { apiVersion: STRIPE_API_VERSION });

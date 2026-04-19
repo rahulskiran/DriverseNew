@@ -9,7 +9,7 @@ function newIdempotencyKey() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
-export async function createCheckoutSession(amount, donorInfo = {}, turnstileToken = null) {
+export async function createCheckoutSession(amount, donorInfo = {}) {
   const donationAmount = parseFloat(amount);
   if (!Number.isFinite(donationAmount) || donationAmount < 1 || donationAmount > 100000) {
     throw new Error('Invalid donation amount. Must be between $1 and $100,000');
@@ -23,7 +23,6 @@ export async function createCheckoutSession(amount, donorInfo = {}, turnstileTok
     body: JSON.stringify({
       amount: donationAmount,
       donorInfo,
-      turnstileToken,
       idempotencyKey: newIdempotencyKey(),
     }),
   });

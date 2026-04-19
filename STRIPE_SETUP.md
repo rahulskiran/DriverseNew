@@ -9,7 +9,7 @@ This project uses **Stripe Checkout** for secure payment processing. The integra
   - `POST /api/create-checkout-session` — creates a session (rate-limited, Turnstile-gated, idempotent)
   - `GET  /api/checkout-session?id=cs_…` — verifies a session by re-fetching from Stripe (used by the success page)
   - `POST /api/webhook` — Stripe webhook receiver (signature-verified, deduped by `event.id`)
-- **Security**: Strict CORS allow-list, Cloudflare Turnstile bot check, per-IP sliding-window rate limit, Stripe API version pinned, request idempotency keys, webhook idempotency dedupe via Upstash, server-side session re-fetch.
+- **Security**: Strict CORS allow-list, per-IP sliding-window rate limit, Stripe API version pinned, request idempotency keys, webhook idempotency dedupe via Upstash, server-side session re-fetch.
 
 ## Setup Instructions
 
@@ -32,12 +32,6 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 # REQUIRED in production AND preview — used for CORS allow-list and Stripe redirect URLs
 SITE_URL=https://your-domain.com
 
-# Cloudflare Turnstile — REQUIRED in production
-# Frontend site key (must be VITE_-prefixed to be available to the bundle)
-VITE_TURNSTILE_SITE_KEY=0xAAAAAAAAAAAAAAAAAAAAAA
-# Server secret used to verify the token at /turnstile/v0/siteverify
-TURNSTILE_SECRET_KEY=0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-
 # Upstash Redis — REQUIRED in production (rate limit + webhook idempotency)
 UPSTASH_REDIS_REST_URL=https://xxxx.upstash.io
 UPSTASH_REDIS_REST_TOKEN=xxxx
@@ -51,10 +45,9 @@ UPSTASH_REDIS_REST_TOKEN=xxxx
 Production fail-closed behavior:
 
 - Missing `SITE_URL` → all browser CORS rejected.
-- Missing `TURNSTILE_SECRET_KEY` → `/api/create-checkout-session` returns 403 for every request.
 - Missing Upstash env vars → rate limiter and webhook idempotency return 503.
 
-In local dev (no `VERCEL_ENV`), all three degrade gracefully so you can iterate without external services.
+In local dev (no `VERCEL_ENV`), both degrade gracefully so you can iterate without external services.
 
 ### 3. Configure Vercel environment variables
 
@@ -65,8 +58,6 @@ In **Vercel** → your project → **Settings** → **Environment Variables**, a
 | `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Production / Preview |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Production / Preview |
 | `SITE_URL` | `https://your-domain.com` (no trailing slash) | Production / Preview (REQUIRED) |
-| `VITE_TURNSTILE_SITE_KEY` | From [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) | Production / Preview (REQUIRED) |
-| `TURNSTILE_SECRET_KEY` | From Cloudflare Turnstile | Production / Preview (REQUIRED) |
 | `UPSTASH_REDIS_REST_URL` | From [Upstash console](https://console.upstash.com) | Production / Preview (REQUIRED) |
 | `UPSTASH_REDIS_REST_TOKEN` | From Upstash console | Production / Preview (REQUIRED) |
 | `RATE_LIMIT_CHECKOUT_PER_MINUTE` | e.g. `15` | Optional; default 15 |
@@ -100,7 +91,6 @@ Visit `/donate` and run a test donation.
 - ✅ Content Security Policy without `'unsafe-inline'` for scripts
 - ✅ HSTS (HTTP Strict Transport Security) with `includeSubDomains`
 - ✅ Strict CORS allow-list (fail-closed in production)
-- ✅ Cloudflare Turnstile bot challenge (fail-closed in production)
 - ✅ Per-IP sliding-window rate limit (Upstash) using non-spoofable IP source
 - ✅ Stripe API version pinned in code
 - ✅ Idempotency-Key on `checkout.sessions.create` (prevents duplicate sessions on retry)

@@ -6,7 +6,6 @@ const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,189}\.[^\s@]{2,24}$/;
 const NAME_RE = /^[\p{L}\p{M}\p{N}\s.,'\-]{1,80}$/u;
 const SESSION_ID_RE = /^cs_(test|live)_[A-Za-z0-9]{20,200}$/;
 const IDEMP_RE = /^[A-Za-z0-9_-]{8,128}$/;
-const TURNSTILE_RE = /^[A-Za-z0-9._-]{10,4096}$/;
 
 export function validateAmount(raw) {
   const n = Number(raw);
@@ -53,14 +52,6 @@ export function validateIdempotencyKey(raw) {
   if (raw == null) return { ok: true, value: null };
   if (typeof raw !== 'string' || !IDEMP_RE.test(raw)) {
     return { ok: false, error: 'Invalid idempotency key' };
-  }
-  return { ok: true, value: raw };
-}
-
-export function validateTurnstileToken(raw) {
-  if (raw == null) return { ok: true, value: null };
-  if (typeof raw !== 'string' || !TURNSTILE_RE.test(raw)) {
-    return { ok: false, error: 'Invalid challenge token' };
   }
   return { ok: true, value: raw };
 }

@@ -1,16 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Heart, ArrowRight, Shield, Lock } from 'lucide-react';
 import { createCheckoutSession, redirectToCheckout } from '../utils/stripe';
-import TurnstileGate, { TURNSTILE_ENABLED } from './TurnstileGate';
 
 const DonationSection = () => {
     const [selectedAmount, setSelectedAmount] = useState(100);
     const [customAmount, setCustomAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState(null);
-    const [turnstileToken, setTurnstileToken] = useState(null);
-    const turnstileRef = useRef(null);
-    const donateDisabled = isProcessing || (TURNSTILE_ENABLED && !turnstileToken);
 
     const presets = [
         { value: 50, impact: "Provides 1 Safety Kit" },
@@ -34,20 +30,14 @@ const DonationSection = () => {
             return;
         }
 
-        if (TURNSTILE_ENABLED && !turnstileToken) {
-            setError("Please complete the bot check above before donating.");
-            return;
-        }
-
         setIsProcessing(true);
 
         try {
-            const { url } = await createCheckoutSession(amount, {}, turnstileToken);
+            const { url } = await createCheckoutSession(amount);
             redirectToCheckout(url);
         } catch (err) {
             console.error('Payment error:', err);
             setError(err.message || 'Failed to initialize payment. Please try again.');
-            if (turnstileRef.current) turnstileRef.current.reset();
             setIsProcessing(false);
         }
     };
@@ -161,17 +151,10 @@ const DonationSection = () => {
                         </div>
                     </div>
 
-                    {/* Bot check */}
-                    {TURNSTILE_ENABLED && (
-                        <div className="mb-4 flex justify-center">
-                            <TurnstileGate ref={turnstileRef} onToken={setTurnstileToken} />
-                        </div>
-                    )}
-
                     <button
                         onClick={handleDonation}
-                        disabled={donateDisabled}
-                        className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${donateDisabled ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        disabled={isProcessing}
+                        className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${isProcessing ? 'opacity-70 cursor-wait' : ''}`}
                     >
                         {isProcessing ? 'Processing...' : 'Donate Securely'}
                         {!isProcessing && <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />}
