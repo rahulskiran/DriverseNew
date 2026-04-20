@@ -1,43 +1,17 @@
 /**
- * Webhook idempotency / replay defense via Upstash Redis.
+ * Webhook idempotency.
  *
- * Stripe retries delivered events for up to ~3 days; this layer ensures any
- * downstream side-effect (DB write, email, counter) only runs once per event.id.
+ * Upstash-backed dedupe is currently DISABLED. Stripe may retry an event
+ * multiple times (up to ~3 days); while this is off, the webhook will
+ * process each delivery. That is safe today because the only side effect
+ * is a console.log. Re-enable before adding real side effects (DB writes,
+ * emails, counters) by restoring an Upstash (or equivalent) claim store.
  */
-import { Redis } from '@upstash/redis';
-
-const TTL_SECONDS = 60 * 60 * 24 * 7;
-
-let cachedRedis;
-
-function getRedis() {
-  if (cachedRedis) return cachedRedis;
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    return null;
-  }
-  cachedRedis = Redis.fromEnv();
-  return cachedRedis;
-}
 
 /**
  * Returns:
- *   { firstSeen: true }  → safe to process this event for the first time
- *   { firstSeen: false } → duplicate, skip side effects
- *   { unavailable: true }→ Redis unreachable / not configured (caller decides)
+ *   { firstSeen: true }  → always, while dedupe is disabled
  */
-export async function claimEvent(eventId) {
-  if (!eventId || typeof eventId !== 'string') {
-    return { firstSeen: false };
-  }
-  const redis = getRedis();
-  if (!redis) return { unavailable: true };
-
-  try {
-    const key = `stripe:event:${eventId}`;
-    const result = await redis.set(key, '1', { nx: true, ex: TTL_SECONDS });
-    return { firstSeen: result === 'OK' };
-  } catch (err) {
-    console.error('Idempotency Redis error:', err);
-    return { unavailable: true };
-  }
+export async function claimEvent(_eventId) {
+  return { firstSeen: true };
 }

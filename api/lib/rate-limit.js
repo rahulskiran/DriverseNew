@@ -1,70 +1,14 @@
 /**
- * Distributed rate limit for Vercel serverless (Upstash Redis).
+ * Rate limit helpers.
  *
- * Behavior:
- *  - In production (VERCEL_ENV === 'production') Upstash MUST be configured;
- *    otherwise getLimiter() throws and callers should fail closed.
- *  - In dev/preview, missing Upstash returns a noop limiter so local work isn't blocked.
+ * Upstash-backed rate limiting is currently DISABLED. These helpers are
+ * no-ops so the checkout and verify endpoints run without any external
+ * dependency. Re-enable by reintroducing an Upstash (or equivalent) client
+ * and returning real limit results from limitCheckoutSession / limitVerify.
  */
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
-
-const MAX_REQUESTS = Number(process.env.RATE_LIMIT_CHECKOUT_PER_MINUTE) || 15;
-const MAX_VERIFY_REQUESTS = Number(process.env.RATE_LIMIT_VERIFY_PER_MINUTE) || 30;
-
-let checkoutLimiter;
-let verifyLimiter;
-let cachedRedis;
 
 function isProd() {
   return process.env.VERCEL_ENV === 'production';
-}
-
-function getRedis() {
-  if (cachedRedis) return cachedRedis;
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    return null;
-  }
-  cachedRedis = Redis.fromEnv();
-  return cachedRedis;
-}
-
-function getCheckoutLimiter() {
-  const redis = getRedis();
-  if (!redis) {
-    if (isProd()) {
-      throw new Error('Upstash Redis is not configured (UPSTASH_REDIS_REST_URL / TOKEN)');
-    }
-    return null;
-  }
-  if (!checkoutLimiter) {
-    checkoutLimiter = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(MAX_REQUESTS, '1 m'),
-      analytics: false,
-      prefix: 'ratelimit:checkout',
-    });
-  }
-  return checkoutLimiter;
-}
-
-function getVerifyLimiter() {
-  const redis = getRedis();
-  if (!redis) {
-    if (isProd()) {
-      throw new Error('Upstash Redis is not configured (UPSTASH_REDIS_REST_URL / TOKEN)');
-    }
-    return null;
-  }
-  if (!verifyLimiter) {
-    verifyLimiter = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(MAX_VERIFY_REQUESTS, '1 m'),
-      analytics: false,
-      prefix: 'ratelimit:verify',
-    });
-  }
-  return verifyLimiter;
 }
 
 /**
@@ -92,25 +36,19 @@ export function getClientIp(req) {
 }
 
 /**
- * @param {string} key  e.g. `checkout:${ip}`
+ * @param {string} _key  ignored while rate limiting is disabled
  * @returns {Promise<{ success: boolean, reset?: number }>}
  */
-export async function limitCheckoutSession(key) {
-  const limiter = getCheckoutLimiter();
-  if (!limiter) return { success: true };
-  const result = await limiter.limit(key);
-  return { success: result.success, reset: result.reset };
+export async function limitCheckoutSession(_key) {
+  return { success: true };
 }
 
 /**
- * @param {string} key  e.g. `verify:${ip}`
+ * @param {string} _key  ignored while rate limiting is disabled
  * @returns {Promise<{ success: boolean, reset?: number }>}
  */
-export async function limitVerify(key) {
-  const limiter = getVerifyLimiter();
-  if (!limiter) return { success: true };
-  const result = await limiter.limit(key);
-  return { success: result.success, reset: result.reset };
+export async function limitVerify(_key) {
+  return { success: true };
 }
 
 export { isProd };
