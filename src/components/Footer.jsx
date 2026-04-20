@@ -1,22 +1,7 @@
-import React, { useState } from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail, Send } from 'lucide-react';
+import React from 'react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
-    const [email, setEmail] = useState('');
-    const [subscribed, setSubscribed] = useState(false);
-
-    const handleSubscribe = (e) => {
-        e.preventDefault();
-        if (!email || !email.includes('@')) {
-            alert('Please enter a valid email address.');
-            return;
-        }
-        window.location.href = `mailto:contact@driversefoundation.org?subject=Newsletter&body=Please%20add%20me%20to%20the%20newsletter%3A%20${encodeURIComponent(email)}`;
-        setSubscribed(true);
-        setEmail('');
-        setTimeout(() => setSubscribed(false), 5000);
-    };
-
     return (
         <footer className="relative bg-[#020617] pt-16 md:pt-24 pb-8 overflow-hidden font-sans border-t border-slate-800/50">
             {/* ========== BACKGROUND NOISE EFFECT ========== */}
@@ -33,7 +18,7 @@ const Footer = () => {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-16 md:mb-24">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 mb-16 md:mb-24">
 
                     {/* Column 1: Logo & About */}
                     <div className="flex flex-col items-start">
@@ -60,18 +45,6 @@ const Footer = () => {
                         <p className="text-slate-400 text-sm leading-relaxed mb-10 max-w-xs body-light opacity-80">
                             A non-profit organization dedicated to the unsung heroes of our highways. Empowering truck drivers through health, wellness, and safety initiatives.
                         </p>
-
-                        <div className="flex items-center gap-4" aria-label="Social media (links not yet configured)">
-                            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                                <span
-                                    key={i}
-                                    className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 cursor-not-allowed opacity-70"
-                                    title="Social links coming soon"
-                                >
-                                    <Icon size={18} />
-                                </span>
-                            ))}
-                        </div>
                     </div>
 
                     {/* Column 2: Programs */}
@@ -82,7 +55,7 @@ const Footer = () => {
                         <ul className="space-y-4">
                             {['Health & Wellness', 'Safety Training', 'Peer Support', 'Newcomer Guide', 'Crisis Pathways'].map((link) => (
                                 <li key={link}>
-                                    <a href="#programs" className="text-slate-400 hover:text-blue-500 text-sm transition-colors duration-300 flex items-center gap-2 group">
+                                    <a href="/#programs" className="text-slate-400 hover:text-blue-500 text-sm transition-colors duration-300 flex items-center gap-2 group">
                                         <div className="w-1 h-1 rounded-full bg-blue-500/50 group-hover:bg-blue-500 transition-colors" />
                                         {link}
                                     </a>
@@ -101,7 +74,7 @@ const Footer = () => {
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500 mt-1">
                                     <MapPin size={18} />
                                 </div>
-                                <span className="text-slate-400 text-sm leading-relaxed max-w-[200px]">
+                                <span className="text-slate-400 text-sm leading-relaxed max-w-[220px]">
                                     United States — mailing address available on request via email.
                                 </span>
                             </li>
@@ -120,50 +93,14 @@ const Footer = () => {
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500">
                                     <Mail size={18} />
                                 </div>
-                                <span className="text-slate-400 text-sm">
+                                <a
+                                    href="mailto:contact@driversefoundation.org"
+                                    className="text-slate-400 text-sm hover:text-blue-400 transition-colors"
+                                >
                                     contact@driversefoundation.org
-                                </span>
+                                </a>
                             </li>
                         </ul>
-                    </div>
-
-                    {/* Column 4: Stay Updated */}
-                    <div>
-                        <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-8 heading-display">
-                            Stay Updated
-                        </h4>
-                        <p className="text-slate-400 text-sm leading-relaxed mb-8 opacity-80">
-                            Subscribe to our newsletter for the latest updates on workshops and driver resources.
-                        </p>
-
-                        <form onSubmit={handleSubscribe} className="space-y-3">
-                            <div className="relative group">
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Email Address"
-                                    disabled={subscribed}
-                                    className="w-full bg-[#0a1122] border border-slate-800 rounded-xl py-4 px-5 text-sm text-white placeholder-slate-600 outline-none focus:border-blue-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={subscribed}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-sm transition-all duration-300 shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-75 disabled:cursor-not-allowed"
-                            >
-                                {subscribed ? (
-                                    <>
-                                        Opening email… ✓
-                                    </>
-                                ) : (
-                                    <>
-                                        Subscribe
-                                        <Send size={16} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                                    </>
-                                )}
-                            </button>
-                        </form>
                     </div>
 
                 </div>
@@ -172,7 +109,7 @@ const Footer = () => {
                 <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-6">
                     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
                         <p className="text-slate-500 text-xs font-medium">
-                            © 2026 Driverse Foundation. All rights reserved.
+                            © {new Date().getFullYear()} Driverse Foundation. All rights reserved.
                         </p>
                         <span className="hidden md:block text-slate-700">|</span>
                         <a
@@ -186,15 +123,24 @@ const Footer = () => {
                     </div>
 
                     <div className="flex items-center gap-6 md:gap-8">
-                        {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((link) => (
-                            <a
-                                key={link}
-                                href={`mailto:contact@driversefoundation.org?subject=${encodeURIComponent(link)}`}
-                                className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
-                            >
-                                {link}
-                            </a>
-                        ))}
+                        <a
+                            href="/privacy"
+                            className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
+                        >
+                            Privacy Policy
+                        </a>
+                        <a
+                            href="/terms"
+                            className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
+                        >
+                            Terms of Service
+                        </a>
+                        <a
+                            href="/donation-terms"
+                            className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
+                        >
+                            Donation Terms
+                        </a>
                     </div>
                 </div>
             </div>

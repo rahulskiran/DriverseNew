@@ -3,12 +3,16 @@
  *
  * - Raw body required for signature verification.
  * - Stripe API version is pinned.
- * - event.id is deduped via Upstash Redis so future side effects (DB write,
- *   email, counter) only run once even on Stripe retries.
+ * - event.id would be deduped through claimEvent(); deduplication is currently
+ *   disabled (see api/lib/idempotency.js). Re-enable before adding side effects
+ *   that are not idempotent on the receiving end.
+ * - Paid checkout sessions are forwarded to api/lib/donation-store.js, which
+ *   always logs and optionally POSTs to DONATIONS_WEBHOOK_URL.
  */
 import { buffer } from 'micro';
 import Stripe from 'stripe';
 import { claimEvent } from './lib/idempotency.js';
+import { recordDonation } from './lib/donation-store.js';
 
 const STRIPE_API_VERSION = '2024-06-20';
 
@@ -79,13 +83,7 @@ export default async function handler(req, res) {
         // for money-affecting decisions.
         const session = await stripe.checkout.sessions.retrieve(sessionRef.id);
         if (session.payment_status === 'paid') {
-          console.log(
-            'Payment confirmed:',
-            session.id,
-            session.amount_total,
-            session.currency
-          );
-          // TODO: persist donation record (event.id is already claimed → safe).
+          await recordDonation(session, event.id);
         } else {
           console.log('Session completed but not paid:', session.id, session.payment_status);
         }
