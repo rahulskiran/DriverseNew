@@ -4,6 +4,7 @@ import CancelPage from './components/CancelPage.jsx';
 import PrivacyPolicy from './components/PrivacyPolicy.jsx';
 import TermsOfService from './components/TermsOfService.jsx';
 import DonationTerms from './components/DonationTerms.jsx';
+import ContactPage from './components/ContactPage.jsx';
 
 function normalizePath(pathname) {
   const p = pathname.replace(/\/$/, '');
@@ -18,5 +19,6 @@ export default function Root() {
   if (path === '/privacy') return <PrivacyPolicy />;
   if (path === '/terms') return <TermsOfService />;
   if (path === '/donation-terms') return <DonationTerms />;
+  if (path === '/contact') return <ContactPage />;
   return <App />;
 }

@@ -74,19 +74,25 @@ const Footer = () => {
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500 mt-1">
                                     <MapPin size={18} />
                                 </div>
-                                <span className="text-slate-400 text-sm leading-relaxed max-w-[220px]">
-                                    United States — mailing address available on request via email.
-                                </span>
+                                <a
+                                    href="https://www.google.com/maps/search/?api=1&query=5200+Dixie+Rd+Suite+206+Mississauga+ON+L5T+1C7+Canada"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-slate-400 text-sm leading-relaxed max-w-[240px] hover:text-blue-400 transition-colors"
+                                >
+                                    5200 Dixie Rd, Suite 206<br />
+                                    Mississauga, ON L5T 1C7, Canada
+                                </a>
                             </li>
                             <li className="flex items-center gap-4">
                                 <div className="p-2 rounded-lg bg-blue-600/10 text-blue-500">
                                     <Phone size={18} />
                                 </div>
                                 <a
-                                    href="mailto:contact@driversefoundation.org?subject=Callback%20request"
+                                    href="tel:+14377781697"
                                     className="text-slate-400 text-sm hover:text-blue-400 transition-colors"
                                 >
-                                    Email us to request a call back
+                                    +1 (437) 778-1697
                                 </a>
                             </li>
                             <li className="flex items-center gap-4">
@@ -122,7 +128,13 @@ const Footer = () => {
                         </a>
                     </div>
 
-                    <div className="flex items-center gap-6 md:gap-8">
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 md:gap-x-8">
+                        <a
+                            href="/contact"
+                            className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
+                        >
+                            Contact Us
+                        </a>
                         <a
                             href="/privacy"
                             className="text-slate-500 hover:text-blue-500 text-xs font-medium transition-colors"
