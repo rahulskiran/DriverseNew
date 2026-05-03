@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, MapPin, Phone, Mail, Send, Clock, MoveRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Send, Clock, CheckCircle2 } from 'lucide-react';
 import Button from './Button';
 
 const PHONE_DISPLAY = '+1 (437) 778-1697';
@@ -143,11 +143,11 @@ const ContactPage = () => {
                     </a>
                 </div>
 
-                {/* ========== FORM + MAP ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
+                {/* ========== FORM + OFFICE HOURS ========== */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-start">
 
                     {/* ----- FORM ----- */}
-                    <div className="lg:col-span-3 relative rounded-3xl bg-gradient-to-br from-slate-900/95 to-slate-900/60 border border-slate-800/80 p-6 md:p-10 backdrop-blur-xl overflow-hidden">
+                    <div className="relative rounded-3xl bg-gradient-to-br from-slate-900/95 to-slate-900/60 border border-slate-800/80 p-6 md:p-10 backdrop-blur-xl overflow-hidden">
                         <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
 
                         <div className="relative">
@@ -254,67 +254,35 @@ const ContactPage = () => {
                         </div>
                     </div>
 
-                    {/* ----- MAP + HOURS ----- */}
-                    <div className="lg:col-span-2 flex flex-col gap-6">
-
-                        {/* Map */}
-                        <div className="relative rounded-3xl overflow-hidden border border-slate-800/80 bg-slate-900/60 group">
-                            <div className="aspect-[4/3] lg:aspect-auto lg:h-[360px] w-full">
-                                <iframe
-                                    title="Driverse Foundation office location"
-                                    src={`https://www.google.com/maps?q=${MAPS_QUERY}&output=embed`}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0, filter: 'grayscale(0.4) contrast(1.1) brightness(0.85)' }}
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    allowFullScreen
-                                />
-                            </div>
-                            <a
-                                href={`https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800 hover:border-blue-500/50 hover:bg-slate-950/90 text-white text-sm font-medium transition-all group/link"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <MapPin size={16} className="text-blue-400" />
-                                    Open in Google Maps
-                                </span>
-                                <MoveRight size={16} className="text-slate-400 group-hover/link:text-blue-400 group-hover/link:translate-x-1 transition-all" />
-                            </a>
-                        </div>
-
-                        {/* Office Hours */}
-                        <div className="relative rounded-3xl bg-gradient-to-br from-slate-900/95 to-slate-900/60 border border-slate-800/80 p-6 md:p-7 overflow-hidden">
-                            <div className="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none" />
-                            <div className="relative">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                                        <Clock size={18} />
-                                    </div>
-                                    <h3 className="text-white font-bold text-base tracking-tight">
-                                        Office Hours
-                                    </h3>
+                    {/* ----- OFFICE HOURS ----- */}
+                    <div className="relative rounded-3xl bg-gradient-to-br from-slate-900/95 to-slate-900/60 border border-slate-800/80 p-6 md:p-7 overflow-hidden">
+                        <div className="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <Clock size={18} />
                                 </div>
-                                <ul className="space-y-3 text-sm">
-                                    <li className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-                                        <span className="text-slate-400">Monday – Friday</span>
-                                        <span className="text-white font-medium">9:00 AM – 6:00 PM</span>
-                                    </li>
-                                    <li className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-                                        <span className="text-slate-400">Saturday</span>
-                                        <span className="text-white font-medium">10:00 AM – 4:00 PM</span>
-                                    </li>
-                                    <li className="flex items-center justify-between">
-                                        <span className="text-slate-400">Sunday</span>
-                                        <span className="text-slate-500 font-medium">Closed</span>
-                                    </li>
-                                </ul>
-                                <p className="text-slate-500 text-xs mt-5 leading-relaxed">
-                                    All times Eastern (ET). For urgent driver support outside these hours, please email us — we monitor inboxes daily.
-                                </p>
+                                <h3 className="text-white font-bold text-base tracking-tight">
+                                    Office Hours
+                                </h3>
                             </div>
+                            <ul className="space-y-3 text-sm">
+                                <li className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+                                    <span className="text-slate-400">Monday – Friday</span>
+                                    <span className="text-white font-medium">9:00 AM – 6:00 PM</span>
+                                </li>
+                                <li className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+                                    <span className="text-slate-400">Saturday</span>
+                                    <span className="text-white font-medium">10:00 AM – 4:00 PM</span>
+                                </li>
+                                <li className="flex items-center justify-between">
+                                    <span className="text-slate-400">Sunday</span>
+                                    <span className="text-slate-500 font-medium">Closed</span>
+                                </li>
+                            </ul>
+                            <p className="text-slate-500 text-xs mt-5 leading-relaxed">
+                                All times Eastern (ET). For urgent driver support outside these hours, please email us — we monitor inboxes daily.
+                            </p>
                         </div>
                     </div>
                 </div>
