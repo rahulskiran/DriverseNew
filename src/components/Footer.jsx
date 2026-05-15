@@ -58,7 +58,7 @@ const Footer = () => {
                                 <li key={link}>
                                     <a href="/#programs" className="text-slate-400 hover:text-blue-500 text-sm transition-colors duration-300 flex items-center gap-2 group">
                                         <div className="w-1 h-1 rounded-full bg-blue-500/50 group-hover:bg-blue-500 transition-colors" />
-                                        {item.label}
+                                        {link}
                                     </a>
                                 </li>
                             ))}

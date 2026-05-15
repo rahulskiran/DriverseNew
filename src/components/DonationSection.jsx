@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Heart, ArrowRight, Shield, Lock } from 'lucide-react';
 import { createCheckoutSession, redirectToCheckout } from '../utils/stripe';
 
+const DONATION_MIN = 1;
+const DONATION_MAX = 100000;
+
 const DonationSection = () => {
     const [selectedAmount, setSelectedAmount] = useState(100);
     const [customAmount, setCustomAmount] = useState('');
@@ -14,13 +17,14 @@ const DonationSection = () => {
         { value: 250, impact: "Emergency Lodging Support" }
     ];
 
-    const getRecaptchaToken = async () => {
-        if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) return '';
-        try {
-            return await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'donate' });
-        } catch {
-            return '';
-        }
+    const handleCustomAmountChange = (e) => {
+        const val = e.target.value;
+        if (val !== '' && parseFloat(val) < 0) return;
+        if (val.includes('.') && val.split('.')[1]?.length > 2) return;
+        if (val !== '' && parseFloat(val) > DONATION_MAX) return;
+        setCustomAmount(val);
+        setSelectedAmount(null);
+        setError(null);
     };
 
     const handleDonation = async (e) => {
@@ -34,8 +38,13 @@ const DonationSection = () => {
             return;
         }
 
-        if (amount > 100000) {
-            setError("Maximum donation amount is $100,000. Please contact us for larger donations.");
+        if (amount > DONATION_MAX) {
+            setError(`Maximum donation amount is $${DONATION_MAX.toLocaleString()}. Please contact us for larger donations.`);
+            return;
+        }
+
+        if (amount < DONATION_MIN) {
+            setError(`Minimum donation amount is $${DONATION_MIN}.`);
             return;
         }
 
@@ -146,14 +155,6 @@ const DonationSection = () => {
                             Min ${DONATION_MIN} — Max ${DONATION_MAX.toLocaleString()}
                         </p>
                     </div>
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-xs md:text-sm rounded-xl px-4 py-3 mb-5 md:mb-6 animate-fade-in-up">
-                            <AlertCircle size={16} className="shrink-0" />
-                            <span>{error}</span>
-                        </div>
-                    )}
 
                     {/* Trust Indicators */}
                     <div className="flex flex-wrap justify-center gap-x-4 md:gap-x-6 gap-y-2 mb-6 md:mb-8 text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">

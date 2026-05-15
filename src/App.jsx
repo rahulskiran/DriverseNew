@@ -4,13 +4,16 @@ import { observeReveals } from './observeReveals';
 
 const HomeSections = lazy(() => import('./HomeSections.jsx'));
 
-// Scroll to top on route change
-function ScrollToTop() {
-  const { pathname, hash } = useLocation();
-
+function App() {
   useEffect(() => {
+    observeReveals();
+    document.documentElement.style.scrollBehavior = 'smooth';
+  }, []);
+
+  // Handle hash scrolling on load
+  useEffect(() => {
+    const hash = window.location.hash;
     if (hash) {
-      // Scroll to hash target after a short delay (for rendering)
       setTimeout(() => {
         const el = document.querySelector(hash);
         if (el) {
@@ -18,19 +21,7 @@ function ScrollToTop() {
           window.scrollTo({ top: offsetTop, behavior: 'smooth' });
         }
       }, 100);
-    } else {
-      window.scrollTo(0, 0);
     }
-  }, [pathname, hash]);
-
-  return null;
-}
-
-// Homepage with all sections
-function HomePage() {
-  useEffect(() => {
-    observeReveals();
-    document.documentElement.style.scrollBehavior = 'smooth';
   }, []);
 
   return (
@@ -40,22 +31,6 @@ function HomePage() {
         <HomeSections />
       </Suspense>
     </main>
-  );
-}
-
-function App() {
-  return (
-    <Router>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/donation-success" element={<DonationSuccess />} />
-        <Route path="/donation-cancel" element={<DonationCancel />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/refund" element={<RefundPolicy />} />
-      </Routes>
-    </Router>
   );
 }
 
