@@ -116,7 +116,9 @@ const Footer = () => {
                 <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
                         <p className="text-slate-500 text-xs font-medium">
-                            © {new Date().getFullYear()} Driverse Foundation. All rights reserved.
+                            © {new Date().getFullYear()} Driverse Foundation. All rights reserved.<br />
+                            Driverse Foundation is a federally incorporated Canadian nonprofit organization.<br />
+                            Corporation No. 1758326-5 · BN: 748767639 RC0001 · Registered under the Canada Not-for-profit Corporations Act.
                         </p>
                         <span className="hidden md:block text-slate-700">|</span>
                         <a

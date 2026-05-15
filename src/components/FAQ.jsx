@@ -52,7 +52,7 @@ const FAQ = () => {
         },
         {
             question: "Is my donation tax-deductible?",
-            answer: "If your organization has 501(c)(3) status, donations are generally tax-deductible in the U.S. to the extent allowed by law. Stripe emails a payment receipt; keep it for your records and confirm with your tax advisor."
+            answer: "Driverse Foundation is a federally incorporated Canadian nonprofit (Corporation No. 1758326-5). We are currently in the process of applying for registered charitable status with the Canada Revenue Agency (CRA). Until charitable status is confirmed, we are unable to issue official tax receipts. We appreciate your support and will notify donors once charitable status is obtained."
         }
     ];
 
