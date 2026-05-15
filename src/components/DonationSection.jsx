@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, AlertCircle, Lock } from 'lucide-react';
+import { validateDonationAmount, DONATION_MIN, DONATION_MAX } from '../lib/validation';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const DonationSection = () => {
     const [selectedAmount, setSelectedAmount] = useState(100);
     const [customAmount, setCustomAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState('');
+    const [honeypot, setHoneypot] = useState('');
 
     const presets = [
         { value: 50, impact: "Provides 1 Safety Kit" },
@@ -12,24 +18,74 @@ const DonationSection = () => {
         { value: 250, impact: "Emergency Lodging Support" }
     ];
 
+    const getRecaptchaToken = async () => {
+        if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) return '';
+        try {
+            return await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'donate' });
+        } catch {
+            return '';
+        }
+    };
+
     const handleDonation = async (e) => {
         e.preventDefault();
-        const amount = customAmount ? parseFloat(customAmount) : selectedAmount;
+        setError('');
 
-        if (!amount || amount <= 0) {
-            alert("Please enter a valid donation amount.");
+        const rawAmount = customAmount ? customAmount : selectedAmount;
+        const validation = validateDonationAmount(rawAmount);
+
+        if (!validation.valid) {
+            setError(validation.error);
             return;
         }
 
         setIsProcessing(true);
 
-        // Simulation of Stripe Redirect/Session Creation
-        setTimeout(() => {
+        try {
+            const recaptchaToken = await getRecaptchaToken();
+
+            const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: validation.sanitized,
+                    recaptchaToken,
+                    honeypot,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Payment service unavailable. Please try again.');
+            }
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error('Unable to create checkout session.');
+            }
+        } catch (err) {
+            setError(err.message || 'Something went wrong. Please try again.');
             setIsProcessing(false);
-            console.log(`Redirecting to Stripe for $${amount}...`);
-            // In a real app: window.location.href = stripeUrl;
-            alert(`Redirecting to Secure Payment for $${amount}. Thank you for your support!`);
-        }, 1500);
+        }
+    };
+
+    const handleCustomAmountChange = (e) => {
+        const val = e.target.value;
+
+        // Prevent negatives
+        if (val !== '' && parseFloat(val) < 0) return;
+
+        // Limit decimal places to 2
+        if (val.includes('.') && val.split('.')[1]?.length > 2) return;
+
+        // Prevent exceeding max
+        if (val !== '' && parseFloat(val) > DONATION_MAX) return;
+
+        setCustomAmount(val);
+        setSelectedAmount(null);
+        setError('');
     };
 
     return (
@@ -76,6 +132,20 @@ const DonationSection = () => {
                         </p>
                     </div>
 
+                    {/* Honeypot — invisible anti-bot field */}
+                    <div className="absolute" style={{ left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+                        <label htmlFor="website_url">Website</label>
+                        <input
+                            type="text"
+                            id="website_url"
+                            name="website_url"
+                            autoComplete="off"
+                            tabIndex={-1}
+                            value={honeypot}
+                            onChange={(e) => setHoneypot(e.target.value)}
+                        />
+                    </div>
+
                     {/* Form Controls */}
                     <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5 md:mb-6">
                         {presets.map((preset) => (
@@ -85,6 +155,7 @@ const DonationSection = () => {
                                 onClick={() => {
                                     setSelectedAmount(preset.value);
                                     setCustomAmount('');
+                                    setError('');
                                 }}
                                 className={`flex flex-col items-center justify-center py-3 md:py-4 rounded-xl transition-all duration-300 border ${selectedAmount === preset.value && !customAmount
                                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30'
@@ -105,30 +176,37 @@ const DonationSection = () => {
                             <input
                                 type="number"
                                 placeholder="Enter Amount"
-                                min="1"
+                                min={DONATION_MIN}
+                                max={DONATION_MAX}
+                                step="0.01"
                                 disabled={isProcessing}
                                 value={customAmount}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    // Prevent negatives
-                                    if (val !== '' && parseFloat(val) < 0) return;
-                                    setCustomAmount(val);
-                                    setSelectedAmount(null);
-                                }}
+                                onChange={handleCustomAmountChange}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 md:py-3.5 pl-12 pr-6 text-sm md:text-base font-bold text-slate-900 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 transition-all"
                             />
                         </div>
+                        <p className="text-[9px] text-slate-400 mt-1.5 pl-1">
+                            Min ${DONATION_MIN} — Max ${DONATION_MAX.toLocaleString()}
+                        </p>
                     </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-xs md:text-sm rounded-xl px-4 py-3 mb-5 md:mb-6 animate-fade-in-up">
+                            <AlertCircle size={16} className="shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
 
                     {/* Trust Indicators */}
                     <div className="flex flex-wrap justify-center gap-x-4 md:gap-x-6 gap-y-2 mb-6 md:mb-8 text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                            Tax Exempt
+                            Canadian Nonprofit
                         </div>
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                            Secure Stripe
+                            <Lock size={10} className="text-blue-500" />
+                            Encrypted Payment
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
@@ -141,18 +219,26 @@ const DonationSection = () => {
                         disabled={isProcessing}
                         className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${isProcessing ? 'opacity-70 cursor-wait' : ''}`}
                     >
-                        {isProcessing ? 'Processing...' : 'Process Secure Donation'}
-                        {!isProcessing && <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />}
+                        {isProcessing ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Redirecting to Checkout...
+                            </>
+                        ) : (
+                            <>
+                                Process Secure Donation
+                                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                            </>
+                        )}
                     </button>
 
                     {/* Security Footer */}
-                    <p className="mt-4 text-[9px] text-slate-400 text-center font-medium opacity-60 flex items-center justify-center gap-1">
-                        <svg className="w-10 h-3" viewBox="0 0 40 12" fill="currentColor">
-                            {/* Simplified Stripe Representation */}
-                            <path d="M5 10V4.5a2 2 0 0 1 4 0V10" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                            <text x="12" y="10" fontSize="10" fontWeight="bold">STRIPE</text>
-                        </svg>
-                        SECURED ENCRYPTION
+                    <p className="mt-4 text-[9px] text-slate-400 text-center font-medium opacity-60 flex items-center justify-center gap-1.5">
+                        <Lock size={10} />
+                        Payment secured by Stripe — PCI DSS Level 1 Certified
                     </p>
                 </div>
             </div>

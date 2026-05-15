@@ -2,9 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>driverse-app</title>
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com;
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                   font-src 'self' https://fonts.gstatic.com;
+                   img-src 'self' data: https:;
+                   connect-src 'self' https://api.stripe.com https://www.google.com;
+                   frame-src https://www.google.com https://js.stripe.com;
+                   object-src 'none';
+                   base-uri 'self';" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- SEO Meta Tags -->
+    <title>Driverse Foundation — Supporting Truck Drivers, Every Mile</title>
+    <meta name="description" content="The Driverse Foundation is a non-profit dedicated to the health, safety, and well-being of truck drivers. Donate today to support the heroes of our highways." />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:title" content="Driverse Foundation — Supporting Truck Drivers" />
+    <meta property="og:description" content="Donate to support truck driver health, safety, and wellness programs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/16-9.webp" />
+
+    <!-- Performance: Font Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   </head>
   <body>
     <div id="root"></div>

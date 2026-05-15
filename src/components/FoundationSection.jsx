@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Award, Shield, MapPin, Globe, Clock } from 'lucide-react';
+import { Rocket, Users, Globe2, Calendar, Globe, Clock } from 'lucide-react';
 
 const FoundationSection = () => {
     const [hasAnimated, setHasAnimated] = useState(false);
@@ -8,32 +8,24 @@ const FoundationSection = () => {
 
     const stats = [
         {
+            icon: <Rocket className="w-6 h-6 text-blue-500" />,
+            display: "5",
+            label: "Programs Launching 2026"
+        },
+        {
             icon: <Users className="w-6 h-6 text-blue-500" />,
-            value: "500",
-            target: 500,
-            suffix: "+",
-            label: "Drivers Supported"
+            display: "4",
+            label: "Directors on the Board"
         },
         {
-            icon: <Award className="w-6 h-6 text-blue-500" />,
-            value: "50",
-            target: 50,
-            suffix: "+",
-            label: "Safety Workshops"
+            icon: <Globe2 className="w-6 h-6 text-blue-500" />,
+            display: "Canada-Wide",
+            label: "Reach & Coverage"
         },
         {
-            icon: <Shield className="w-6 h-6 text-blue-500" />,
-            value: "100",
-            target: 100,
-            suffix: "%",
-            label: "Crisis Interventions"
-        },
-        {
-            icon: <MapPin className="w-6 h-6 text-blue-500" />,
-            value: "48",
-            target: 48,
-            suffix: "",
-            label: "States Covered"
+            icon: <Calendar className="w-6 h-6 text-blue-500" />,
+            display: "Dec 2025",
+            label: "Launch Year"
         }
     ];
 
@@ -42,7 +34,6 @@ const FoundationSection = () => {
             (entries) => {
                 if (entries[0].isIntersecting && !hasAnimated) {
                     setHasAnimated(true);
-                    animateNumbers();
                 }
             },
             { threshold: 0.2 }
@@ -54,27 +45,6 @@ const FoundationSection = () => {
 
         return () => observer.disconnect();
     }, [hasAnimated]);
-
-    const animateNumbers = () => {
-        const duration = 2000; // 2 seconds
-        const frameRate = 1000 / 60; // 60 fps
-        const totalFrames = Math.round(duration / frameRate);
-
-        let frame = 0;
-        const interval = setInterval(() => {
-            frame++;
-            const progress = frame / totalFrames;
-            // Ease out quad: 1 - (1 - x)^2
-            const easedProgress = 1 - (1 - progress) * (1 - progress);
-
-            setCounts(stats.map(stat => Math.floor(stat.target * easedProgress)));
-
-            if (frame === totalFrames) {
-                clearInterval(interval);
-                setCounts(stats.map(stat => stat.target));
-            }
-        }, frameRate);
-    };
 
     return (
         <section ref={sectionRef} className="relative min-h-screen bg-white flex items-center justify-center py-10 md:py-14 lg:py-16 font-sans text-slate-900 overflow-hidden">
@@ -128,8 +98,8 @@ const FoundationSection = () => {
                                     <Globe className="w-5 h-5 md:w-6 md:h-6" />
                                 </div>
                                 <div className="pt-0.5">
-                                    <h4 className="font-bold text-slate-900 text-base md:text-lg mb-1 tracking-tight">Nationwide</h4>
-                                    <p className="text-xs md:text-sm text-slate-500 leading-relaxed">Resources across the country</p>
+                                    <h4 className="font-bold text-slate-900 text-base md:text-lg mb-1 tracking-tight">Canada-Wide</h4>
+                                    <p className="text-xs md:text-sm text-slate-500 leading-relaxed">Resources across Canada's provinces and territories</p>
                                 </div>
                             </div>
                             <div className="group flex items-start gap-4 p-5 md:p-6 border border-slate-200/40 rounded-[1.75rem] bg-gradient-to-br from-white to-slate-50/30 backdrop-blur-sm hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-500">
@@ -158,8 +128,8 @@ const FoundationSection = () => {
                                     {React.cloneElement(stat.icon, { className: "w-6 h-6 md:w-7 md:h-7 text-blue-600 group-hover:text-white transition-colors duration-500" })}
                                 </div>
                                 <div className="relative space-y-1">
-                                    <div className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">
-                                        {counts[index]}{stat.suffix}
+                                    <div className={`font-black text-slate-900 tracking-tighter leading-none ${stat.display.length > 4 ? 'text-xl sm:text-2xl md:text-3xl' : 'text-3xl sm:text-4xl md:text-5xl'}`}>
+                                        {stat.display}
                                     </div>
                                     <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 font-semibold tracking-wider uppercase leading-tight">
                                         {stat.label}

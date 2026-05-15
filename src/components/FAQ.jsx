@@ -52,7 +52,7 @@ const FAQ = () => {
         },
         {
             question: "Is my donation tax-deductible?",
-            answer: "Absolutely. The Driverse Foundation is a registered 501(c)(3) non-profit organization. Every donation is tax-deductible to the full extent allowed by law, and you'll receive a receipt immediately."
+            answer: "Driverse Foundation is a federally incorporated Canadian nonprofit (Corporation No. 1758326-5). We are currently in the process of applying for registered charitable status with the Canada Revenue Agency (CRA). Until charitable status is confirmed, we are unable to issue official tax receipts. We appreciate your support and will notify donors once charitable status is obtained."
         }
     ];
 
