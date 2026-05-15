@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import { Heart, ArrowRight, AlertCircle, Lock } from 'lucide-react';
-import { validateDonationAmount, DONATION_MIN, DONATION_MAX } from '../lib/validation';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+import { Heart, ArrowRight, Shield, Lock } from 'lucide-react';
+import { createCheckoutSession, redirectToCheckout } from '../utils/stripe';
 
 const DonationSection = () => {
     const [selectedAmount, setSelectedAmount] = useState(100);
     const [customAmount, setCustomAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState('');
-    const [honeypot, setHoneypot] = useState('');
+    const [error, setError] = useState(null);
 
     const presets = [
         { value: 50, impact: "Provides 1 Safety Kit" },
@@ -29,63 +25,30 @@ const DonationSection = () => {
 
     const handleDonation = async (e) => {
         e.preventDefault();
-        setError('');
+        setError(null);
+        
+        const amount = customAmount ? parseFloat(customAmount) : selectedAmount;
 
-        const rawAmount = customAmount ? customAmount : selectedAmount;
-        const validation = validateDonationAmount(rawAmount);
+        if (!amount || amount <= 0) {
+            setError("Please enter a valid donation amount.");
+            return;
+        }
 
-        if (!validation.valid) {
-            setError(validation.error);
+        if (amount > 100000) {
+            setError("Maximum donation amount is $100,000. Please contact us for larger donations.");
             return;
         }
 
         setIsProcessing(true);
 
         try {
-            const recaptchaToken = await getRecaptchaToken();
-
-            const response = await fetch(`${API_URL}/api/create-checkout-session`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: validation.sanitized,
-                    recaptchaToken,
-                    honeypot,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Payment service unavailable. Please try again.');
-            }
-
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error('Unable to create checkout session.');
-            }
+            const { url } = await createCheckoutSession(amount);
+            redirectToCheckout(url);
         } catch (err) {
-            setError(err.message || 'Something went wrong. Please try again.');
+            console.error('Payment error:', err);
+            setError(err.message || 'Failed to initialize payment. Please try again.');
             setIsProcessing(false);
         }
-    };
-
-    const handleCustomAmountChange = (e) => {
-        const val = e.target.value;
-
-        // Prevent negatives
-        if (val !== '' && parseFloat(val) < 0) return;
-
-        // Limit decimal places to 2
-        if (val.includes('.') && val.split('.')[1]?.length > 2) return;
-
-        // Prevent exceeding max
-        if (val !== '' && parseFloat(val) > DONATION_MAX) return;
-
-        setCustomAmount(val);
-        setSelectedAmount(null);
-        setError('');
     };
 
     return (
@@ -132,19 +95,13 @@ const DonationSection = () => {
                         </p>
                     </div>
 
-                    {/* Honeypot — invisible anti-bot field */}
-                    <div className="absolute" style={{ left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
-                        <label htmlFor="website_url">Website</label>
-                        <input
-                            type="text"
-                            id="website_url"
-                            name="website_url"
-                            autoComplete="off"
-                            tabIndex={-1}
-                            value={honeypot}
-                            onChange={(e) => setHoneypot(e.target.value)}
-                        />
-                    </div>
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-red-500 flex-shrink-0" />
+                            <p className="text-xs text-red-600">{error}</p>
+                        </div>
+                    )}
 
                     {/* Form Controls */}
                     <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5 md:mb-6">
@@ -155,7 +112,7 @@ const DonationSection = () => {
                                 onClick={() => {
                                     setSelectedAmount(preset.value);
                                     setCustomAmount('');
-                                    setError('');
+                                    setError(null);
                                 }}
                                 className={`flex flex-col items-center justify-center py-3 md:py-4 rounded-xl transition-all duration-300 border ${selectedAmount === preset.value && !customAmount
                                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30'
@@ -202,15 +159,11 @@ const DonationSection = () => {
                     <div className="flex flex-wrap justify-center gap-x-4 md:gap-x-6 gap-y-2 mb-6 md:mb-8 text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                            Canadian Nonprofit
-                        </div>
-                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4 md:pr-6 last:border-0 last:pr-0">
-                            <Lock size={10} className="text-blue-500" />
-                            Encrypted Payment
+                            Tax-deductible if applicable
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                            100% Impact
+                            <Lock className="w-3 h-3 text-blue-500" />
+                            Card payments handled by Stripe
                         </div>
                     </div>
 
@@ -219,27 +172,16 @@ const DonationSection = () => {
                         disabled={isProcessing}
                         className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-blue-500/25 active:scale-[0.98] group ${isProcessing ? 'opacity-70 cursor-wait' : ''}`}
                     >
-                        {isProcessing ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Redirecting to Checkout...
-                            </>
-                        ) : (
-                            <>
-                                Process Secure Donation
-                                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                            </>
-                        )}
+                        {isProcessing ? 'Processing...' : 'Donate Securely'}
+                        {!isProcessing && <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />}
                     </button>
 
-                    {/* Security Footer */}
-                    <p className="mt-4 text-[9px] text-slate-400 text-center font-medium opacity-60 flex items-center justify-center gap-1.5">
-                        <Lock size={10} />
-                        Payment secured by Stripe — PCI DSS Level 1 Certified
-                    </p>
+                    {/* Footer */}
+                    <div className="mt-4 flex flex-col items-center gap-2">
+                        <p className="text-[10px] text-slate-400 text-center">
+                            You will be redirected to Stripe Checkout to complete your donation. We never see or store your card details.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>

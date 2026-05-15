@@ -30,5 +30,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Vercel
-.vercel
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Stripe keys (if stored separately)
+stripe-keys.json
+secrets.json

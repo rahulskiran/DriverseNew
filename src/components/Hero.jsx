@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, MoveRight, Truck, X } from 'lucide-react';
+import { Menu, MoveRight, X } from 'lucide-react';
 import Button from './Button';
 
 const Hero = () => {
@@ -41,12 +41,15 @@ const Hero = () => {
         <div className="font-inter text-white bg-[#020617]">
             {/* Navigation Header */}
             <header className="fixed top-0 left-0 w-full z-50 p-4 md:p-8 flex justify-center">
-                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2 md:px-8 md:py-2.5 flex items-center justify-between shadow-2xl relative z-50">
-                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer group/logo">
-                        <div className="p-2 bg-[#0071e3] rounded-xl shadow-lg shadow-blue-500/20">
-                            <Truck className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                        </div>
-                        <span className="text-xl md:text-2xl font-semibold tracking-tight">Driverse</span>
+                <nav className="w-full max-w-6xl bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 px-5 py-2.5 md:px-8 md:py-3 flex items-center justify-between shadow-2xl relative z-50">
+                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center cursor-pointer group/logo">
+                        <img
+                            src="/images/driverse-header-logo.png"
+                            alt="Driverse"
+                            className="h-5 w-auto shrink-0 md:h-6"
+                            width={1453}
+                            height={292}
+                        />
                     </a>
 
                     {/* Desktop Navigation */}
@@ -185,7 +188,7 @@ const Hero = () => {
                         </p>
                     </div>
 
-                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left reveal delay-200">
+                    <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold heading-display mb-8 text-white w-full text-left reveal delay-200">
                         Driving Change<br />
                         for the Heroes.
                     </h1>

@@ -18,7 +18,6 @@ const PillarsOfSupport = () => {
                 'Healthy Eating on the Road',
                 'Ergonomic Driving Practices'
             ],
-            linkText: 'Learn more about Health'
         },
         {
             id: 'safety',
@@ -33,7 +32,6 @@ const PillarsOfSupport = () => {
                 'Severe Weather Preparedness',
                 'Vehicle Maintenance Basics'
             ],
-            linkText: 'Learn more about Safety'
         },
         {
             id: 'peer',
@@ -48,7 +46,6 @@ const PillarsOfSupport = () => {
                 'Community Meetups',
                 'Family Support Groups'
             ],
-            linkText: 'Learn more about Peer'
         },
         {
             id: 'newcomer',
@@ -63,7 +60,6 @@ const PillarsOfSupport = () => {
                 'Mechanic Apprenticeship Resources',
                 'Industry Integration Workshops'
             ],
-            linkText: 'Learn more about Newcomer'
         },
         {
             id: 'crisis',
@@ -78,7 +74,6 @@ const PillarsOfSupport = () => {
                 'Legal Aid Connections',
                 'Family Emergency Coordination'
             ],
-            linkText: 'Learn more about Crisis'
         }
     ];
 
@@ -169,11 +164,17 @@ const PillarsOfSupport = () => {
 
                         <div className="pt-6 border-t border-slate-100 mt-auto">
                             <a
-                                href="#"
+                                href="#donate"
                                 className="inline-flex items-center gap-3 text-blue-600 text-sm md:text-base font-bold hover:gap-5 transition-all group"
-                                onClick={(e) => e.preventDefault()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const el = document.querySelector('#donate');
+                                    if (el) {
+                                        window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+                                    }
+                                }}
                             >
-                                {activePillar.linkText}
+                                Support this program
                                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </a>
                         </div>
