@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, MapPin, Phone, Mail, Send, Clock, CheckCircle2 } from 'lucide-react';
 import Button from './Button';
 
-const PHONE_DISPLAY = '+1 (437) 778-1697';
-const PHONE_TEL = '+14377781697';
+const PHONE_DISPLAY = '+1 (437) 383-9224';
+const PHONE_TEL = '+14373839224';
 const EMAIL = 'contact@driversefoundation.org';
 const ADDRESS_LINE_1 = '5200 Dixie Rd, Suite 206';
 const ADDRESS_LINE_2 = 'Mississauga, ON L5T 1C7';

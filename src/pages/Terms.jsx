@@ -126,7 +126,7 @@ const Terms = () => {
                         <p className="text-slate-600 text-sm leading-relaxed">
                             If you have questions about these Terms & Conditions, please contact us at:<br />
                             <strong>Email:</strong> driversefoundation@gmail.com<br />
-                            <strong>Phone:</strong> +1 437 778 1697
+                            <strong>Phone:</strong> +1 437 383 9224
                         </p>
                     </section>
                 </div>

@@ -136,7 +136,7 @@ const PrivacyPolicy = () => {
                         <p className="text-slate-600 text-sm leading-relaxed">
                             For questions about this Privacy Policy or to exercise your data rights, contact us at:<br />
                             <strong>Email:</strong> driversefoundation@gmail.com<br />
-                            <strong>Phone:</strong> +1 437 778 1697<br />
+                            <strong>Phone:</strong> +1 437 383 9224<br />
                             <strong>Address:</strong> 5200 Dixie Rd, Mississauga, ON L4W 1E4, Canada
                         </p>
                     </section>
